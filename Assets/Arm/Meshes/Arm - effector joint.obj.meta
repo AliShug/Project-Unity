@@ -7,11 +7,16 @@ ModelImporter:
   fileIDToRecycleName:
     100000: //RootNode
     100002: transform5
+    100004: transform1
     400000: //RootNode
     400002: transform5
+    400004: transform1
     2300000: transform5
+    2300002: transform1
     3300000: transform5
+    3300002: transform1
     4300000: transform5
+    4300002: transform1
   materials:
     importMaterials: 0
     materialName: 0

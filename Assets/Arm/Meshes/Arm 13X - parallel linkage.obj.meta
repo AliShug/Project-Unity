@@ -7,11 +7,16 @@ ModelImporter:
   fileIDToRecycleName:
     100000: <STL_BINARY>
     100002: //RootNode
+    100004: transform1
     400000: <STL_BINARY>
     400002: //RootNode
+    400004: transform1
     2300000: <STL_BINARY>
+    2300002: transform1
     3300000: <STL_BINARY>
+    3300002: transform1
     4300000: <STL_BINARY>
+    4300002: transform1
   materials:
     importMaterials: 0
     materialName: 0
