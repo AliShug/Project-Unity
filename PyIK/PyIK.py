@@ -133,7 +133,7 @@ class Kinectics:
             comm.timeout = 0.01
 
         window.InitRenderer()
-        self.r = window.Renderer(pyg.display.set_mode([800, 600], pyg.DOUBLEBUF|pyg.HWSURFACE))
+        self.r = window.Renderer(pyg.display.set_mode([1200, 600], pyg.DOUBLEBUF|pyg.HWSURFACE))
         pyg.display.set_caption("IK Control Test")
 
         # The arm'comm controller - encapsulates IK and arm control
@@ -198,7 +198,7 @@ class Kinectics:
             elif (event.type == pyg.MOUSEBUTTONDOWN
                     or event.type == pyg.MOUSEMOTION):
                 if pyg.mouse.get_pressed()[0]:
-                    if event.pos[0] < 400:
+                    if event.pos[0] < 600:
                         # lock direction on start of interaction
                         if event.type == pyg.MOUSEBUTTONDOWN:
                             goal_topdown = [self.curGoal[0], self.curGoal[2]]
@@ -243,7 +243,7 @@ class Kinectics:
         armVec = rotate(vertical, radians(self.armAngle)) * 35
         self.r.drawLine(views.pt_r([0, 0]), views.pt_r(armVec), black)
         text = "Actual {d:.3f} deg".format(d = self.armAngle)
-        self.r.drawText(text, gray, [400, 60])
+        self.r.drawText(text, gray, [600, 60])
 
         # Write out the current servo positions
         i = 0

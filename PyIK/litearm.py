@@ -7,23 +7,26 @@ import solvers
 from util import *
 
 class ArmConfig:
-    """Holds an arm's proportions, limits etc"""
+    """Holds an arm's proportions, limits and other configuration data"""
     def __init__(self,
                  main_length = 148.4,
                  forearm_length = 160,
                  linkage_length = 155,
                  lower_actuator_length = 65,
                  upper_actuator_length = 54.4,
+                 wrist_length = 90.6,
                  shoulder_offset = [-10, 18.568]):
         self.main_length = main_length
         self.forearm_length = forearm_length
         self.linkage_length = linkage_length
         self.lower_actuator_length = lower_actuator_length
         self.upper_actuator_length = upper_actuator_length
+        self.wrist_length = wrist_length;
         self.shoulder_offset = shoulder_offset
 
+
 class ArmPose:
-    structFormat = 'fff'
+    structFormat = 'fffff'
 
     """Defines a physical configuration of the arm"""
     def __init__(self,
@@ -34,7 +37,8 @@ class ArmPose:
                  elbow_angle,
                  elbow2D,
                  wrist2D,
-                 wrist):
+                 effector2D,
+                 effector):
         self.cfg = arm_config
         self.swing_angle = swing_angle
         self.shoulder_angle = shoulder_angle
@@ -45,13 +49,16 @@ class ArmPose:
         self.shoulder2D = [self.cfg.shoulder_offset[1], 0]
         self.shoulder = [shoulder[0], 0, shoulder[1]]
         self.wrist2D = wrist2D
-        self.wrist = wrist
-        # construct the 3D elbow position from the 2D (planar) IK solution
-        arm_vec = wrist - self.shoulder
+        self.effector2D = effector2D
+        self.effector = effector
+        # Finally construct the 3D elbow & wrist positions from the 2D (planar) IK
+        # solution
+        arm_vec = effector - self.shoulder
         arm_vec[1] = 0
         self.elbow2D = elbow2D
         self.elbow = self.shoulder + normalize(arm_vec)*elbow2D[0]
         self.elbow[1] = elbow2D[1]
+        self.wrist = self.effector - normalize(arm_vec)*arm_config.wrist_length
 
     def serialize(self):
         """Returns a packed struct holding the pose information"""
@@ -59,7 +66,11 @@ class ArmPose:
             ArmPose.structFormat,
             self.swing_angle,
             self.shoulder_angle,
-            self.elbow_angle
+            self.elbow_angle,
+            # TODO wrist yaw
+            0.0,
+            # TODO wrist pitch
+            0.0
         )
 
 class ArmController:
@@ -76,6 +87,7 @@ class ArmController:
         self.ik = solvers.IKSolver(
             arm_config.main_length,
             arm_config.forearm_length,
+            arm_config.wrist_length,
             arm_config.shoulder_offset)
         self.physsolver = solvers.PhysicalSolver(
             arm_config.main_length,
@@ -137,8 +149,9 @@ class ArmController:
                 # angle between the main arm and forearm
                 elbow_angle = elbow_angle,
                 elbow2D = self.ik.elbow,
-                wrist2D = self.ik.goalpl,
-                wrist = self.ik.goal
+                wrist2D = self.ik.wristpl,
+                effector2D = self.ik.goalpl,
+                effector = self.ik.goal
             )
         return self.ik_pose
 

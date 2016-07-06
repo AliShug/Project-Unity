@@ -6,14 +6,14 @@ def pt_l(p):
 
 def pt_r(p):
     point = np.array(p).astype(int)
-    return (600 + point[0], 300 - point[1])
+    return (900 + point[0], 450 - point[1])
 
 
 def unpt_l(p):
     return np.array([p[0] - 150, 300 - p[1]])
 
 def unpt_r(p):
-    return np.array([p[0] - 600, 300 - p[1]])
+    return np.array([p[0] - 900, 450 - p[1]])
 
 
 def getArmVerticalOffset(val):
@@ -49,6 +49,7 @@ class PlaneView:
         # Components
         main_arm = pose.elbow2D - pose.shoulder2D
         fore_arm = pose.wrist2D - pose.elbow2D
+        effector = pose.effector2D - pose.wrist2D
 
         col = self.color
         # if not self.ik.valid:
@@ -58,9 +59,11 @@ class PlaneView:
         r.drawLine(pt_l(pose.shoulder2D), pt_l(pose.elbow2D), col, self.line_width)
         r.drawLine(pt_l(pose.elbow2D), pt_l(pose.elbow2D+main_arm/3), gray)
         r.drawLine(pt_l(pose.elbow2D), pt_l(pose.wrist2D), col, self.line_width/2)
+        r.drawLine(pt_l(pose.wrist2D), pt_l(pose.effector2D), col, self.line_width)
         r.drawCircle(pt_l(pose.shoulder2D), self.line_width, gray)
         r.drawCircle(pt_l(pose.elbow2D), self.line_width, gray)
-        r.drawCircle(pt_l(pose.wrist2D), self.line_width, col)
+        r.drawCircle(pt_l(pose.wrist2D), self.line_width, gray)
+        r.drawCircle(pt_l(pose.effector2D), self.line_width, col)
 
         # Real positions
         # Rotations from vertical
@@ -113,7 +116,7 @@ class TopView:
         # Base
         r.drawCircle(pt_r([0, 0]), 30, [230, 230, 230])
 
-        offset = 400
+        offset = 600
         swing = degrees(pose.swing_angle)
         text = "Swing {0:.2f} deg".format(swing)
         r.drawText(text, black, [offset, 20])
@@ -132,9 +135,12 @@ class TopView:
         shoulder = [pose.shoulder[0], pose.shoulder[2]]
         elbow = [pose.elbow[0], pose.elbow[2]]
         wrist = [pose.wrist[0], pose.wrist[2]]
+        effector = [pose.effector[0], pose.effector[2]]
 
         # Wrist is drawn below everything
-        r.drawCircle(pt_r(wrist), self.line_width, col)
+        r.drawLine(pt_r(wrist), pt_r(effector), col, self.line_width)
+        #r.drawCircle(pt_r(wrist), self.line_width/2, gray)
+        r.drawCircle(pt_r(effector), self.line_width/2, gray)
 
         r.drawLine(pt_r(shoulder), pt_r(elbow), col, self.line_width)
         r.drawCircle(pt_r(shoulder), self.line_width, gray)

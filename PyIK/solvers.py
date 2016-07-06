@@ -76,13 +76,14 @@ class PhysicalSolver:
         return base_angle
 
 class IKSolver:
-    def __init__(self, len0, len1, base_offset, origin = [0, 0, 0]):
+    def __init__(self, len0, len1, wrist_len, base_offset, origin = [0, 0, 0]):
         self.origin = np.array(origin)
         self.elbow = np.array([0, 0])
         self.radial = 0
         self.swing = 0
         self.len0 = len0
         self.len1 = len1
+        self.wrist_len = wrist_len
         self.base_offset = base_offset
 
     def setGoal(self, goal):
@@ -100,6 +101,7 @@ class IKSolver:
 
     def resolveIK(self):
         # Top-down IK - resolve swing angle and radial distance
+        # NOTE 'td' here means "top-down", while 'pl' means "planar" or side-on
         self.origintd = np.array([self.origin[0], self.origin[2]])
         self.goaltd = np.array([self.goal[0], self.goal[2]]) # X and Z position
         deltatd = self.goaltd - self.origintd
@@ -143,12 +145,16 @@ class IKSolver:
         # Radial distance (shoulder to goal)
         self.radial = np.linalg.norm(self.goaltd - self.shoulder(self.swing))
 
-        # Planar IK - calculate elbow pos using circles about origin and goal
+        # Planar IK - calculate elbow pos using circles about the shoulder and
+        # wrist joints
         zoffs = self.base_offset[1]
         self.goalpl = np.array([zoffs + self.radial, self.goal[1]])
+        # Wrist is offset back from target end-effector position
+        self.wristpl = self.goalpl - [self.wrist_len, 0]
         self.originpl = np.array([self.origin[0] + zoffs, self.origin[1]])
+
         c1 = Circle(self.originpl, self.len0)
-        c2 = Circle(self.goalpl, self.len1)
+        c2 = Circle(self.wristpl, self.len1)
         points = c1.intersect(c2)
         if points is not None and points != np.inf:
             # valid, pick higher point
