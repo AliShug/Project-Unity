@@ -2,6 +2,7 @@
 using System;
 using System.Net;
 using System.Text;
+using System.IO;
 using System.Collections;
 using System.Net.Sockets;
 
@@ -10,27 +11,41 @@ public class socket_test : MonoBehaviour {
 	public int targetPort = 14001;
 	public int bindPort = 14002;
 
+	public Transform shoulderTransform;
+	public Transform mainArmTransform;
+	public Transform forearmTransform;
+	public Transform wristPlatformTransform;
+	public Transform wristYawTransform;
+	public Transform wristPitchTransform;
+
 	private Socket sockIn;
 	private Socket sockOut;
+
+	private int _frame = 0;
+	private float shoulderAngle, mainArmAngle, forearmAngle;
 
 	// Use this for initialization
 	void Start() {
 		sockIn = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-		sockIn.Bind(new IPEndPoint(IPAddress.Loopback, bindPort));
+		try {
+			sockIn.Bind(new IPEndPoint(IPAddress.Loopback, bindPort));
+			Debug.Log("Bound " + bindPort.ToString());
 
-		sockOut = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-		sockOut.Connect(new IPEndPoint(IPAddress.Loopback, targetPort));
+			sockOut = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+			sockOut.Connect(new IPEndPoint(IPAddress.Loopback, targetPort));
 
-//		// Stop a stupid error
-//		uint IOC_IN = 0x80000000;
-//		uint IOC_VENDOR = 0x18000000;
-//		uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-//		udp.Client.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
-
-		Debug.Log("Bound " + bindPort.ToString());
+			// Initialize angles to set transforms
+			shoulderAngle = shoulderTransform.localRotation.eulerAngles.y;
+			mainArmAngle = 90 - mainArmTransform.localRotation.eulerAngles.z;
+			forearmAngle = - forearmTransform.localRotation.eulerAngles.z;
+		}
+		catch {
+			Debug.LogError ("Unable to initialize socket connection");
+			enabled = false;
+		}
 	}
 	
-	// Update is called once per frame
+	// Update is called once per frame, if enabled
 	void Update() {
 		// Send stuff
 		string nstr = "hello";
@@ -39,10 +54,51 @@ public class socket_test : MonoBehaviour {
 
 		// Receive stuff
 		int nbytes = sockIn.Available;
-		if (nbytes > 0) {
-			byte[] data = new byte[4096];
-			sockIn.Receive(data);
-			Debug.Log(Encoding.ASCII.GetString(data));
+		// Exhaustively empty the socket's buffer
+		byte[] rawData = new byte[4096];
+		while (sockIn.Available > 0) {
+			sockIn.Receive(rawData);
+
+			// Extract packed floating-point data from the raw bytes
+			shoulderAngle = System.BitConverter.ToSingle (rawData, 0) * Mathf.Rad2Deg;
+			mainArmAngle = System.BitConverter.ToSingle (rawData, 4) * Mathf.Rad2Deg;
+			forearmAngle = System.BitConverter.ToSingle (rawData, 8) * Mathf.Rad2Deg;
 		}
+
+		// Set the arm configuration
+		Vector3 euler;
+		euler = shoulderTransform.localRotation.eulerAngles;
+		euler.y = shoulderAngle;
+		shoulderTransform.localRotation = Quaternion.Euler (euler);
+
+		euler = mainArmTransform.localRotation.eulerAngles;
+		euler.z = 90 - mainArmAngle;
+		mainArmTransform.localRotation = Quaternion.Euler (euler);
+
+		euler = forearmTransform.localRotation.eulerAngles;
+		euler.z = - forearmAngle;
+		forearmTransform.localRotation = Quaternion.Euler (euler);
+
+		// We rotate the end-effector platform flush to the ground plane
+		euler = wristPlatformTransform.localRotation.eulerAngles;
+		euler.z = mainArmAngle + forearmAngle - 90;
+		wristPlatformTransform.localRotation = Quaternion.Euler (euler);
+
+		// Wrist's lateral movement
+		euler = wristYawTransform.localRotation.eulerAngles;
+		euler.y = -shoulderAngle;
+		wristYawTransform.localRotation = Quaternion.Euler (euler);
+
+		// And pitch
+		euler = wristPitchTransform.localRotation.eulerAngles;
+		euler.z = 0.0f;
+		wristPitchTransform.localRotation = Quaternion.Euler (euler);
+
+
+//		if (_frame % 60 == 0) {
+//			Debug.Log (_value);
+//		}
+
+		_frame++;
 	}
 }

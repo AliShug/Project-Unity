@@ -1,0 +1,162 @@
+from __future__ import print_function
+
+import numpy as np
+
+from util import *
+
+class Circle:
+    def __init__(self, center, radius):
+        self.c = np.array(center)
+        self.r = radius
+
+    def intersect(self, other):
+        dist = np.linalg.norm(self.c - other.c)
+        if dist > self.r + other.r:
+            # No contact
+            return None
+        elif dist == 0 and self.r == other.r:
+            # Coincident
+            return np.inf
+        elif dist + min(self.r, other.r) < max(self.r, other.r):
+            # Contained
+            return None
+        else:
+            # Two intersections
+            a = (self.r**2 - other.r**2 + dist**2) / (2 * dist)
+            h = np.sqrt(self.r**2 - a**2)
+
+            p2 = self.c + (a * (other.c - self.c)) / dist
+            i1 = np.array(p2)
+            i1[0] += h * (other.c[1] - self.c[1]) / dist
+            i1[1] -= h * (other.c[0] - self.c[0]) / dist
+            i2 = np.array(p2)
+            i2[0] -= h * (other.c[1] - self.c[1]) / dist
+            i2[1] += h * (other.c[0] - self.c[0]) / dist
+            return i1, i2
+
+class PhysicalSolver:
+    def __init__(self, len_main, len_linkage, len_ac_lower, len_ac_upper):
+        self.len_main = len_main
+        self.len_linkage = len_linkage
+        self.ac_lower = len_ac_lower
+        self.ac_upper = len_ac_upper
+
+    def solve_forearm(self, left, right):
+        base_angle = left - right
+        A = self.len_linkage
+        B = self.ac_upper
+        C = self.len_main
+        D = self.ac_lower
+        # Repeated application of cosine rule yields the forearm angle
+        # X is a diagonal across the irregular quatrilateral (opposite
+        # base_angle)
+        Xsq = D**2 + C**2 - 2*D*C*np.cos(base_angle)
+        X = np.sqrt(Xsq)
+        # foo and bar are the two angles adjacent to X in the quat
+        foo = np.arccos((Xsq + C**2 - D**2) / (2*X*C))
+        bar = np.arccos((Xsq + B**2 - A**2) / (2*X*B))
+        # together they form the angle between the main arm and forearm
+        return foo + bar
+
+    def inverse_forearm(self, desired):
+        A = self.len_linkage
+        B = self.ac_upper
+        C = self.len_main
+        D = self.ac_lower
+        # Repeated application of cosine rule yields the forearm angle
+        # Y is a diagonal across the irregular quatrilateral (opposite
+        # desired)
+        Ysq = C**2 + B**2 - 2*C*B*np.cos(desired)
+        Y = np.sqrt(Ysq)
+        # foo and bar are the two angles adjacent to Y in the quat
+        foo = np.arccos((Ysq + D**2 - A**2) / (2*Y*D))
+        bar = np.arccos((Ysq + C**2 - B**2) / (2*Y*C))
+        # together they form the angle between the main arm and actuator
+        base_angle = foo + bar
+        return base_angle
+
+class IKSolver:
+    def __init__(self, len0, len1, base_offset, origin = [0, 0, 0]):
+        self.origin = np.array(origin)
+        self.elbow = np.array([0, 0])
+        self.radial = 0
+        self.swing = 0
+        self.len0 = len0
+        self.len1 = len1
+        self.base_offset = base_offset
+
+    def setGoal(self, goal):
+        """Set 3D end-effector goal point for IK"""
+        self.goal = np.array(goal)
+        self.resolveIK()
+
+    def shoulder(self, theta):
+        """Shoulder position (top-down) given swing angle"""
+        return np.array([
+            # base offset is [x, z]
+            self.base_offset[1]*np.sin(theta) + self.base_offset[0]*np.cos(theta),
+            self.base_offset[1]*np.cos(theta) - self.base_offset[0]*np.sin(theta)
+        ])
+
+    def resolveIK(self):
+        # Top-down IK - resolve swing angle and radial distance
+        self.origintd = np.array([self.origin[0], self.origin[2]])
+        self.goaltd = np.array([self.goal[0], self.goal[2]]) # X and Z position
+        deltatd = self.goaltd - self.origintd
+
+        # Resolve swing angle by bisection method: point straight at the
+        # target as a starting point
+        start_theta = np.arctan2(deltatd[0], deltatd[1])
+        # Resting angle to shoulder joint
+        shoulder_theta = sigangle(self.base_offset, vertical)
+        # print ("Shoulder theta ",shoulder_theta)
+        if shoulder_theta < 0:
+            # start_theta will be < target
+            theta_high = start_theta - shoulder_theta
+            theta_low = start_theta
+        else:
+            # start_theta will be > target
+            theta_high = start_theta
+            theta_low = start_theta - shoulder_theta
+        # print ("Starting low ", theta_low)
+        # print ("Starting high ", theta_high)
+        # Bisection loop
+        iters = 0
+        while iters < 20:
+            self.swing = (theta_high + theta_low) * 0.5
+            f_mid = self.swing - sigangle(
+                self.goaltd-self.shoulder(self.swing),
+                vertical
+            )
+            # print (f_mid)
+            if abs(f_mid) < 0.005:
+                break
+            else:
+                if f_mid < 0:
+                    theta_low = self.swing
+                    # print ("New low ", theta_low)
+                else:
+                    theta_high = self.swing
+                    # print ("New high ", theta_high)
+            iters += 1
+
+        # Radial distance (shoulder to goal)
+        self.radial = np.linalg.norm(self.goaltd - self.shoulder(self.swing))
+
+        # Planar IK - calculate elbow pos using circles about origin and goal
+        zoffs = self.base_offset[1]
+        self.goalpl = np.array([zoffs + self.radial, self.goal[1]])
+        self.originpl = np.array([self.origin[0] + zoffs, self.origin[1]])
+        c1 = Circle(self.originpl, self.len0)
+        c2 = Circle(self.goalpl, self.len1)
+        points = c1.intersect(c2)
+        if points is not None and points != np.inf:
+            # valid, pick higher point
+            if points[0][1] > points[1][1]:
+                self.elbow = points[0]
+            else:
+                self.elbow = points[1]
+                self.valid = True
+        else:
+            self.valid = False
+            return self.valid
