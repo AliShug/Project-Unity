@@ -133,7 +133,7 @@ class ArmController:
             # Construct geometry of arm from IK state
             main_arm = self.ik.elbow - self.ik.originpl
             arm_vert_angle = sigangle(main_arm, vertical)
-            forearm = self.ik.goalpl - self.ik.elbow
+            forearm = self.ik.wristpl - self.ik.elbow
             elbow_angle = angle_between(main_arm, forearm)
             # Solve actuator angle for given elbow angle
             # Base angle is between the main arm and actuator

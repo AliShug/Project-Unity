@@ -48,9 +48,9 @@ public class socket_test : MonoBehaviour {
 	// Update is called once per frame, if enabled
 	void Update() {
 		// Send stuff
-		string nstr = "hello";
-		byte[] bytes = Encoding.ASCII.GetBytes(nstr);
-		int sent = sockOut.Send(bytes);
+//		string nstr = "hello";
+//		byte[] bytes = Encoding.ASCII.GetBytes(nstr);
+//		int sent = sockOut.Send(bytes);
 
 		// Receive stuff
 		int nbytes = sockIn.Available;
