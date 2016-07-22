@@ -87,9 +87,10 @@ class IKSolver:
         self.base_offset = base_offset
 
     def setGoal(self, goal):
-        """Set 3D end-effector goal point for IK"""
+        """Set 3D end-effector goal point for IK.
+        Returns True if the resulting configuration is valid"""
         self.goal = np.array(goal)
-        self.resolveIK()
+        return self.resolveIK()
 
     def shoulder(self, theta):
         """Shoulder position (top-down) given swing angle"""
@@ -158,11 +159,12 @@ class IKSolver:
         points = c1.intersect(c2)
         if points is not None and points != np.inf:
             # valid, pick higher point
+            self.valid = True
             if points[0][1] > points[1][1]:
                 self.elbow = points[0]
             else:
                 self.elbow = points[1]
-                self.valid = True
         else:
             self.valid = False
-            return self.valid
+        # Return the validity flag
+        return self.valid

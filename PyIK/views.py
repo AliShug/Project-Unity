@@ -22,11 +22,11 @@ def getArmVerticalOffset(val):
 def getActuatorVerticalOffset(val):
     return val - 150 - 54.78
 
-def getArmFromVerticalOffset(val):
-    return 150 + (28.21 - val)
-
-def getActuatorFromVerticalOffset(val):
-    return val + 150 + 54.78
+# def getArmFromVerticalOffset(val):
+#     return 150 + (28.21 - val)
+#
+# def getActuatorFromVerticalOffset(val):
+#     return val + 150 + 54.78
 
 class PlaneView:
     def __init__(self, color=blue, width=6):
@@ -51,10 +51,27 @@ class PlaneView:
         fore_arm = pose.wrist2D - pose.elbow2D
         effector = pose.effector2D - pose.wrist2D
 
+        vec = rotate(vertical, pose.actuator_angle)
+        actuator = vec*pose.cfg.lower_actuator_length
+        upper_actuator = -normalize(fore_arm)*pose.cfg.upper_actuator_length
+
         col = self.color
         # if not self.ik.valid:
         #     col = red
 
+        # Display actuation mechanism visually
+        r.drawLine(pt_l(pose.shoulder2D),
+                   pt_l(pose.shoulder2D + actuator),
+                   col,
+                   self.line_width / 2)
+        r.drawLine(pt_l(pose.elbow2D),
+                   pt_l(pose.elbow2D + upper_actuator),
+                   col,
+                   self.line_width / 2)
+        r.drawLine(pt_l(pose.shoulder2D + actuator),
+                   pt_l(pose.elbow2D + upper_actuator),
+                   col,
+                   self.line_width / 2)
         # IK Rig
         r.drawLine(pt_l(pose.shoulder2D), pt_l(pose.elbow2D), col, self.line_width)
         r.drawLine(pt_l(pose.elbow2D), pt_l(pose.elbow2D+main_arm/3), gray)
@@ -64,6 +81,7 @@ class PlaneView:
         r.drawCircle(pt_l(pose.elbow2D), self.line_width, gray)
         r.drawCircle(pt_l(pose.wrist2D), self.line_width, gray)
         r.drawCircle(pt_l(pose.effector2D), self.line_width, col)
+
 
         # Real positions
         # Rotations from vertical

@@ -51,7 +51,7 @@ class ArmPose:
         self.wrist2D = wrist2D
         self.effector2D = effector2D
         self.effector = effector
-        # Finally construct the 3D elbow & wrist positions from the 2D (planar) IK
+        # Construct the 3D elbow & wrist positions from the 2D (planar) IK
         # solution
         arm_vec = effector - self.shoulder
         arm_vec[1] = 0
@@ -59,6 +59,21 @@ class ArmPose:
         self.elbow = self.shoulder + normalize(arm_vec)*elbow2D[0]
         self.elbow[1] = elbow2D[1]
         self.wrist = self.effector - normalize(arm_vec)*arm_config.wrist_length
+        # Find the servo target angles for the pose
+        self.servo_elevator = 178.21 - degrees(self.shoulder_angle)
+        self.servo_actuator = degrees(self.actuator_angle) + 204.78
+        self.servo_swing = 150 - degrees(self.swing_angle)
+        # TODO wrist servo pose
+        self.servo_wrist_x = 150
+        self.servo_wrist_y = 150
+        # Validate pose angles
+        self.arm_diff_angle = degrees(shoulder_angle - actuator_angle)
+        self.clear_diff = self.arm_diff_angle > 44
+        self.clear_elevator = self.servo_elevator > 60
+        self.clear_actuator = self.servo_actuator > 95
+
+    def fullClearance(self):
+        return self.clear_diff and self.clear_elevator and self.clear_actuator
 
     def serialize(self):
         """Returns a packed struct holding the pose information"""
@@ -129,7 +144,7 @@ class ArmController:
         self.ik_dirty = True
 
     def getIKPose(self):
-        if self.ik_dirty:
+        if self.ik_dirty and self.ik.valid:
             # Construct geometry of arm from IK state
             main_arm = self.ik.elbow - self.ik.originpl
             arm_vert_angle = sigangle(main_arm, vertical)
@@ -162,15 +177,14 @@ class ArmController:
         if self.target_pose is not None:
             # Drive servos
             if self.servos['swing'] is not None:
-                angle = 150 - degrees(self.target_pose.swing_angle)
-                self.servos['swing'].setGoalPosition(angle)
+                self.servos['swing'].setGoalPosition(self.target_pose.servo_swing)
             if self.servos['shoulder'] is not None:
-                angle = 150 + (28.21 - degrees(self.target_pose.shoulder_angle))
-                self.servos['shoulder'].setGoalPosition(angle)
+                self.servos['shoulder'].setGoalPosition(self.target_pose.servo_elevator)
             if self.servos['elbow'] is not None:
-                angle = degrees(self.target_pose.actuator_angle) + 150 + 54.78
-                self.servos['elbow'].setGoalPosition(angle)
+                self.servos['elbow'].setGoalPosition(self.target_pose.servo_actuator)
 
             if self.servos['wrist_x'] is not None:
                 angle = 150 + degrees(self.target_pose.swing_angle)
-                self.servos['wrist_x'].setGoalPosition(angle)
+                self.servos['wrist_x'].setGoalPosition(self.target_pose.servo_wrist_y)
+            if self.servos['wrist_y'] is not None:
+                self.servos['wrist_y'].setGoalPosition(self.target_pose.servo_wrist_x)

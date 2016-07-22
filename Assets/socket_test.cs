@@ -11,6 +11,8 @@ public class socket_test : MonoBehaviour {
 	public int targetPort = 14001;
 	public int bindPort = 14002;
 
+	public Transform interactionTargetTransform;
+
 	public Transform shoulderTransform;
 	public Transform mainArmTransform;
 	public Transform forearmTransform;
@@ -52,6 +54,12 @@ public class socket_test : MonoBehaviour {
 //		byte[] bytes = Encoding.ASCII.GetBytes(nstr);
 //		int sent = sockOut.Send(bytes);
 
+		byte[] send_raw = new byte[sizeof(float) * 3];
+		System.BitConverter.GetBytes (interactionTargetTransform.localPosition.x).CopyTo(send_raw, 0 * sizeof(float));
+		System.BitConverter.GetBytes (interactionTargetTransform.localPosition.y).CopyTo(send_raw, 1 * sizeof(float));
+		System.BitConverter.GetBytes (interactionTargetTransform.localPosition.z).CopyTo(send_raw, 2 * sizeof(float));
+		sockOut.Send (send_raw);
+
 		// Receive stuff
 		int nbytes = sockIn.Available;
 		// Exhaustively empty the socket's buffer
@@ -68,7 +76,7 @@ public class socket_test : MonoBehaviour {
 		// Set the arm configuration
 		Vector3 euler;
 		euler = shoulderTransform.localRotation.eulerAngles;
-		euler.y = shoulderAngle;
+		euler.y = 90 + shoulderAngle;
 		shoulderTransform.localRotation = Quaternion.Euler (euler);
 
 		euler = mainArmTransform.localRotation.eulerAngles;
