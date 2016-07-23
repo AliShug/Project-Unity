@@ -5,16 +5,6 @@ public class PhysicsInput : MonoBehaviour {
 
 	public float clickDistance = 0.02f;
 
-	public Color objectColor;
-	public Color hoverColor;
-	public Color pressedColor;
-
-	private Color currentColor;
-	private Color originalColor;
-	private Material materialColored;
-
-	private Renderer myRenderer;
-
 	private Collider _collider;
 	public Collider collider {
 		get {
@@ -29,32 +19,17 @@ public class PhysicsInput : MonoBehaviour {
 	private bool _hovering = false;
 	private bool _clicked = false;
 
-	// TODO subclass this crap
-	void ColorUpdate() {
-		if (objectColor != currentColor) {
-			// Clean up the old material
-			if (materialColored != null) {
-				string materialPath = UnityEditor.AssetDatabase.GetAssetPath(materialColored);
-				UnityEditor.AssetDatabase.DeleteAsset(materialPath);
-			}
-			
-			// Create a new material
-			materialColored = new Material(Shader.Find("Standard"));
-			materialColored.color = currentColor = objectColor;
-			if (currentColor != originalColor) {
-				materialColored.SetColor("_EmissionColor", objectColor);
-				materialColored.EnableKeyword("_EMISSION");
-			}
-			myRenderer.material = materialColored;
-		}
+	public bool Hovered {
+		get { return _hovering; }
+	}
+	public bool Clicked {
+		get { return _clicked; }
 	}
 
 	// Use this for initialization
 	void Start () {
-		myRenderer = GetComponent<Renderer>();
-		originalColor = objectColor;
-
 		_originalPosition = transform.position;
+		OnStart();
 	}
 	
 	// Update is called once per frame
@@ -75,41 +50,32 @@ public class PhysicsInput : MonoBehaviour {
 			}
 		}
 
-		ColorUpdate();
+		// Call derived class stuff
+		OnUpdate();
 	}
 
-	void OnCollisionEnter(Collision collision) {
-
-	}
-
-	void OnCollisionExit(Collision collision) {
-
-	}
-
+	protected virtual void OnStart() { return; }
+	protected virtual void OnUpdate() { return; }
 	/**
-	 * Called when the object physically enters its depressed (clicked) state
-	 */
-	void OnClickEnter() {
-		objectColor = pressedColor;
-	}
-
+	* Called when the object physically leaves its depressed state
+	*/
+	protected virtual void OnClickExit() { return; }
 	/**
-	 * Called when the object physically leaves its depressed state
-	 */
-	void OnClickExit() {
-		if (_hovering)
-			objectColor = hoverColor;
-		else
-			objectColor = originalColor;
+	* Called when the object physically enters its depressed (clicked) state
+	*/
+	protected virtual void OnClickEnter() { return; }
+	protected virtual void OnHoverEnter() { return; }
+	protected virtual void OnHoverExit() { return; }
+
+	public void HoverEnter() {
+		if (!_hovering) {
+			_hovering = true;
+			OnHoverEnter();
+		}
 	}
 
-	public void OnHoverEnter() {
-		objectColor = hoverColor;
-		_hovering = true;
-	}
-
-	public void OnHoverExit() {
-		objectColor = originalColor;
+	public void HoverExit() {
 		_hovering = false;
+		OnHoverExit();
 	}
 }

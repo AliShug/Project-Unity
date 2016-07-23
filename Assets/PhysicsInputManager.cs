@@ -2,6 +2,8 @@
 using System.Collections;
 using Leap.Unity;
 
+using MeshExtensions; // custom extension methods
+
 public class PhysicsInputManager : MonoBehaviour {
 
 	public Transform displayTargetWidget;
@@ -28,7 +30,11 @@ public class PhysicsInputManager : MonoBehaviour {
 				if (hand.isActiveAndEnabled) {
 					foreach (RigidFinger finger in hand.fingers) {
 						Transform bone = finger.bones[3];
-						Vector3 point = input.collider.ClosestPointOnBounds(bone.position);
+						// Find closest point on mesh (in local space)
+						Vector3 localPos = input.transform.InverseTransformPoint(bone.position);
+						Vector3 localPoint = input.GetComponent<MeshFilter>().mesh.NearestPoint(localPos);
+						Vector3 point = input.transform.TransformPoint(localPoint);
+
 						float dist = Vector3.Distance(point, bone.position);
 
 						if (dist < closestDist) {
@@ -46,12 +52,12 @@ public class PhysicsInputManager : MonoBehaviour {
 		if (targetInput) {
 			// Hover selection logic <THERE CAN BE ONLY ONE>
 			if (!_lastHovered) {
-				targetInput.OnHoverEnter();
+				targetInput.HoverEnter();
 				_lastHovered = targetInput;
 			}
 			else if (_lastHovered != targetInput) {
-				_lastHovered.OnHoverExit();
-				targetInput.OnHoverEnter();
+				_lastHovered.HoverExit();
+				targetInput.HoverEnter();
 				_lastHovered = targetInput;
 			}
 
@@ -68,7 +74,7 @@ public class PhysicsInputManager : MonoBehaviour {
 		else {
 			// Dehover
 			if (_lastHovered) {
-				_lastHovered.OnHoverExit();
+				_lastHovered.HoverExit();
 				_lastHovered = null;
 			}
 
