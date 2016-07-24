@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 
 public class PhysicsButton : PhysicsInput {
@@ -12,10 +13,12 @@ public class PhysicsButton : PhysicsInput {
 	private Material materialUnique;
 
 	private Renderer myRenderer;
+	private Light myLight = null;
 
 	protected override void OnStart() {
-		// Create a new 
 		myRenderer = GetComponent<Renderer>();
+		myLight = GetComponent<Light>();
+
 		materialOriginal = myRenderer.material;
 		materialUnique = new Material(materialOriginal);
 		materialUnique.EnableKeyword("_EMISSION");
@@ -31,6 +34,9 @@ public class PhysicsButton : PhysicsInput {
 	void ColorUpdate() {
 		// Modify our unique material's emissive properties
 		materialUnique.SetColor("_EmissionColor", currentColor);
+		if (myLight) {
+			myLight.color = currentColor;
+		}
 	}
 
 	/**

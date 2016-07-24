@@ -202,7 +202,9 @@ class Kinectics:
         self.sockOut.send(self.arm.getIKPose().serialize())
 
     def updateServoPositions(self):
-
+        for servo in self.servos.itervalues():
+            if servo is not None:
+                servo.data['pos'] = servo.getPosition()
 
     def tick(self):
         if self.stopped:

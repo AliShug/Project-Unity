@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 
 public class PhysicsInput : MonoBehaviour {
 
+	public UnityEvent pressEvent;
+	public UnityEvent releaseEvent;
 	public float clickDistance = 0.02f;
 
 	private Collider _collider;
@@ -15,6 +18,8 @@ public class PhysicsInput : MonoBehaviour {
 	}
 
 	private Vector3 _originalPosition;
+	private float _furthestDistance;
+	private float _homeDistance;
 
 	private bool _hovering = false;
 	private bool _clicked = false;
@@ -29,24 +34,36 @@ public class PhysicsInput : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		_originalPosition = transform.position;
+		_homeDistance = 0.0f;
 		OnStart();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		// Clicking logic - pass click distance to enter, return to 0.2*dist to exit
+		// Clicking logic - pass click distance from last 'home' point to enter,
+		// return < 90% of 'away' point to exit
 		float distFromStart = Vector3.Distance(_originalPosition, transform.position);
 		if (_clicked) {
-			if (distFromStart < 0.2f * clickDistance) {
+			if (distFromStart < 0.9f*_furthestDistance) {
 				// Unclick
 				_clicked = false;
+				_homeDistance = distFromStart;
 				OnClickExit();
+				releaseEvent.Invoke();
+			}
+			else if (distFromStart > _furthestDistance) {
+				_furthestDistance = distFromStart;
 			}
 		}
 		else {
-			if (distFromStart > clickDistance) {
+			if (distFromStart > _homeDistance + clickDistance) {
 				_clicked = true;
+				_furthestDistance = 0.0f;
 				OnClickEnter();
+				pressEvent.Invoke();
+			}
+			else if (distFromStart < _homeDistance) {
+				_homeDistance = distFromStart;
 			}
 		}
 

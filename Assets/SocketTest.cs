@@ -6,7 +6,7 @@ using System.IO;
 using System.Collections;
 using System.Net.Sockets;
 
-public class socket_test : MonoBehaviour {
+public class SocketTest : MonoBehaviour {
 
 	public int targetPort = 14001;
 	public int bindPort = 14002;
@@ -55,9 +55,10 @@ public class socket_test : MonoBehaviour {
 //		int sent = sockOut.Send(bytes);
 
 		byte[] send_raw = new byte[sizeof(float) * 3];
-		System.BitConverter.GetBytes (interactionTargetTransform.localPosition.x).CopyTo(send_raw, 0 * sizeof(float));
-		System.BitConverter.GetBytes (interactionTargetTransform.localPosition.y).CopyTo(send_raw, 1 * sizeof(float));
-		System.BitConverter.GetBytes (interactionTargetTransform.localPosition.z).CopyTo(send_raw, 2 * sizeof(float));
+		Vector3 pos = transform.InverseTransformPoint(interactionTargetTransform.position);
+		System.BitConverter.GetBytes (pos.x).CopyTo(send_raw, 0 * sizeof(float));
+		System.BitConverter.GetBytes (pos.y - 0.15f).CopyTo(send_raw, 1 * sizeof(float));
+		System.BitConverter.GetBytes (pos.z).CopyTo(send_raw, 2 * sizeof(float));
 		sockOut.Send (send_raw);
 
 		// Receive stuff
