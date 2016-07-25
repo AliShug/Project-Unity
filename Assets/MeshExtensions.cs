@@ -89,25 +89,33 @@ namespace MeshExtensions {
 		/**
 		 * Finds the nearest point on the mesh surface to the given input point
 		 */
-		public static Vector3 NearestPoint(this Mesh mesh, Vector3 point) {
+		public static Vector3 NearestPoint(this Mesh mesh, Vector3 point, out Vector3 normal) {
 			Vector3 closestPoint = new Vector3();
 			float closestSqDist = Mathf.Infinity;
 
-			for (int i = 0; i < mesh.triangles.Length; i += 3) {
-				Vector3 t0, t1, t2;
-				t0 = mesh.vertices[mesh.triangles[i]];
-				t1 = mesh.vertices[mesh.triangles[i + 1]];
-				t2 = mesh.vertices[mesh.triangles[i + 2]];
+			Vector3[] n = new Vector3[3];
+			Vector3[] t = new Vector3[3];
 
-				Vector3 checkPoint = ClosestPointOnTriangle(t0, t1, t2, point);
+			for (int i = 0; i < mesh.triangles.Length; i += 3) {
+				for (int j = 0; j < 3; j++)
+					t[j] = mesh.vertices[mesh.triangles[i + j]];
+
+				Vector3 checkPoint = ClosestPointOnTriangle(t[0], t[1], t[2], point);
 				Vector3 delta = point - checkPoint;
 				float sqDist = delta.sqrMagnitude;
+
 				if (sqDist < closestSqDist) {
 					closestSqDist = sqDist;
 					closestPoint = checkPoint;
+
+					for (int j = 0; j < 3; j++)
+						n[j] = mesh.normals[mesh.triangles[i + j]];
 				}
 			}
 
+			// Normalised average of triangle normals
+			normal = (n[0] + n[1] + n[2])/3;
+			normal.Normalize();
 			return closestPoint;
 		}
 	}
