@@ -1,3 +1,6 @@
+import sys
+import StringIO
+
 import numpy as np
 
 vertical = np.array([0, 1])
@@ -53,3 +56,20 @@ def rotate(v, angle):
         [np.cos(angle), -np.sin(angle)],
         [np.sin(angle),  np.cos(angle)]])
     return np.array(v * mat).squeeze()
+
+def printVec(vec):
+    """Pretty-print a floating point vector/np array"""
+    print(prettyVec(vec))
+
+def prettyVec(vec):
+    """Pretty-format a floating point vector/np array"""
+    out = StringIO.StringIO()
+    out.write('[')
+    for i in xrange(len(vec)):
+        out.write('{0:.2f}'.format(vec[i]))
+        if i < len(vec) - 1:
+            out.write(', ')
+    out.write(']')
+    str = out.getvalue()
+    out.close()
+    return str

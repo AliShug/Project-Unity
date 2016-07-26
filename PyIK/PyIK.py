@@ -94,6 +94,7 @@ class Kinectics:
         }
         # Retrieves a list of servos over serial, one per line
         if comm is not None:
+            timer = time.clock()
             # Set relatively high timeout for this section of board comms
             comm.timeout = 3
             comm.write("list")
@@ -163,8 +164,9 @@ class Kinectics:
 
         self.curGoal = [0, 50, 200]
         self.curDir = np.array([0, 0])
+        self.goalNormal = [0, 0, 1]
 
-        self.last_pose = None
+        self.lastPose = None
 
     def stop(self):
         self.perflog.write('ik_avg {0}\n'.format(self.ik_time_accum/self.ik_time_counter))
@@ -191,11 +193,16 @@ class Kinectics:
             # Ready to receive
             try:
                 raw = self.sockIn.recv(4096)
-                data = struct.unpack('fff', raw)
-                print(data)
-                newGoal = np.array(data)*1000
-                print(newGoal)
+                data = struct.unpack('?ffffff', raw)
+                # enable or disable the physical arm
+                self.arm.enableMovement(data[0])
+                goalPos = np.array(data[1:4])
+                self.goalNormal = np.array(data[4:])
+                #print(data)
+                newGoal = goalPos*1000
+                printVec(self.goalNormal)
                 self.curGoal = newGoal
+
 
             except socket.error as err:
                 print ("Socket error: {0}".format(err))
@@ -237,6 +244,9 @@ class Kinectics:
                         self.curGoal[2] = topgoal[1]
                     if self.curGoal[2] < 1:
                         self.curGoal[2] = 1
+            elif event.type == pyg.KEYDOWN:
+                if event.key == pyg.K_SPACE:
+                    self.arm.enableMovement(True)
 
         # Clear the render canvas
         self.r.surf.fill(white)
@@ -247,12 +257,17 @@ class Kinectics:
         # IK - calculate swing and elbow pos using goal pos
         timer = time.clock()
         self.arm.setWristGoalPosition(self.curGoal)
+        self.arm.setWristGoalDirection(self.goalNormal)
         self.ik_time_accum += time.clock()-timer
         self.ik_time_counter += 1
 
         pose = self.arm.getIKPose()
-        self.arm.setTargetPose(pose)
         self.pid.setTarget(degrees(pose.swing_angle))
+
+        # Incorporate wrist orientation to pose
+        wrist_x, wrist_y = self.wristFromNormal(self.goalNormal)
+        pose.servo_wrist_x = wrist_x;
+        pose.servo_wrist_y = wrist_y;
 
         # Draw the PID test
         armVec = rotate(vertical, radians(self.armAngle)) * 35
@@ -261,7 +276,7 @@ class Kinectics:
         self.r.drawText(text, gray, [600, 60])
 
         self.updateServoPositions()
-        self.displayServoPositions()
+        self.displayServoPositions(black, [400, 20])
 
         # Display critical pose angles
         text = "Elbow differential {0:.3f} deg".format(pose.arm_diff_angle)
@@ -274,15 +289,16 @@ class Kinectics:
         self.r.drawText(text, blue if pose.clear_actuator else red, [40, 560])
 
         # Calculate pose
-        if self.last_pose is None:
-            self.last_pose = pose
-        display_pose = self.last_pose
+        if self.lastPose is None:
+            self.lastPose = pose
+        display_pose = self.lastPose
 
         if pose.fullClearance():
             # Update display pose
             display_pose = pose
-            self.last_pose = pose
+            self.lastPose = pose
             # Drive the main arm
+            self.arm.setTargetPose(pose)
             timer = time.clock()
             self.arm.tick()
             self.serial_time_accum += time.clock()-timer
@@ -294,15 +310,16 @@ class Kinectics:
 
         self.tickComms()
 
-    def displayServoPositions(self):
+    def displayServoPositions(self, col, pos):
         i = 0
-        for servo in self.servos.values():
+        for (name,servo) in self.servos.iteritems():
             if servo is None:
                 continue
-            text = "Servo {id} {d:.3f} deg".format(
+            text = "{name} [{id}]: {d:.3f} deg".format(
+                name = name,
                 d = servo.data['pos'],
                 id = servo.id)
-            self.r.drawText(text, gray, [550, 20+i*20])
+            self.r.drawText(text, col, [pos[0], pos[1]+i*20])
             i += 1
 
     def drawViews(self, pose):

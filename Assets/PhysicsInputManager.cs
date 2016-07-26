@@ -51,7 +51,6 @@ public class PhysicsInputManager : MonoBehaviour {
 			}
 		}
 
-
 		if (targetInput) {
 			// Hover selection logic <THERE CAN BE ONLY ONE>
 			if (!_lastHovered) {

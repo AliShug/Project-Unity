@@ -24,7 +24,7 @@ public class SocketTest : MonoBehaviour {
 	private Socket sockOut;
 
 	private int _frame = 0;
-	private float shoulderAngle, mainArmAngle, forearmAngle;
+	private float shoulderAngle, mainArmAngle, forearmAngle, wristX, wristY;
 
 	// Use this for initialization
 	void Start() {
@@ -49,17 +49,28 @@ public class SocketTest : MonoBehaviour {
 	
 	// Update is called once per frame, if enabled
 	void Update() {
-		// Send stuff
-//		string nstr = "hello";
-//		byte[] bytes = Encoding.ASCII.GetBytes(nstr);
-//		int sent = sockOut.Send(bytes);
-
-		byte[] send_raw = new byte[sizeof(float) * 3];
+		// Updating the IK goal - UDP packet sent to the python app
+        //  1 x 1 : enable-arm
+        //  4 x 3 : goal-position
+        //  4 x 3 : goal-orient
+		byte[] send_raw = new byte[4 + sizeof(float)*6];
+        Vector3 norm = transform.InverseTransformDirection(interactionTargetTransform.forward);
 		Vector3 pos = transform.InverseTransformPoint(interactionTargetTransform.position);
-		System.BitConverter.GetBytes (pos.x).CopyTo(send_raw, 0 * sizeof(float));
-		System.BitConverter.GetBytes (pos.y - 0.15f).CopyTo(send_raw, 1 * sizeof(float));
-		System.BitConverter.GetBytes (pos.z).CopyTo(send_raw, 2 * sizeof(float));
-		sockOut.Send (send_raw);
+
+        // enable
+        send_raw[0] = Convert.ToByte(false);
+        send_raw[1] = 0;
+        send_raw[2] = 0;
+        send_raw[3] = 0;
+        // goal pos
+        System.BitConverter.GetBytes(pos.x).CopyTo(send_raw, 4);
+		System.BitConverter.GetBytes(pos.y).CopyTo(send_raw, 4 + 1*sizeof(float));
+		System.BitConverter.GetBytes(pos.z).CopyTo(send_raw, 4 + 2*sizeof(float));
+        // goal orient
+        System.BitConverter.GetBytes(norm.x).CopyTo(send_raw, 4 + 3*sizeof(float));
+        System.BitConverter.GetBytes(norm.y).CopyTo(send_raw, 4 + 4*sizeof(float));
+        System.BitConverter.GetBytes(norm.z).CopyTo(send_raw, 4 + 5*sizeof(float));
+		sockOut.Send(send_raw);
 
 		// Receive stuff
 		int nbytes = sockIn.Available;
@@ -69,9 +80,11 @@ public class SocketTest : MonoBehaviour {
 			sockIn.Receive(rawData);
 
 			// Extract packed floating-point data from the raw bytes
-			shoulderAngle = System.BitConverter.ToSingle (rawData, 0) * Mathf.Rad2Deg;
-			mainArmAngle = System.BitConverter.ToSingle (rawData, 4) * Mathf.Rad2Deg;
-			forearmAngle = System.BitConverter.ToSingle (rawData, 8) * Mathf.Rad2Deg;
+			shoulderAngle = System.BitConverter.ToSingle(rawData, 0) * Mathf.Rad2Deg;
+			mainArmAngle = System.BitConverter.ToSingle(rawData, 4) * Mathf.Rad2Deg;
+			forearmAngle = System.BitConverter.ToSingle(rawData, 8) * Mathf.Rad2Deg;
+            wristX = System.BitConverter.ToSingle(rawData, 12);
+            wristY = System.BitConverter.ToSingle(rawData, 16);
 		}
 
 		// Set the arm configuration
@@ -95,12 +108,12 @@ public class SocketTest : MonoBehaviour {
 
 		// Wrist's lateral movement
 		euler = wristYawTransform.localRotation.eulerAngles;
-		euler.y = -shoulderAngle;
+		euler.y = wristX - 150;
 		wristYawTransform.localRotation = Quaternion.Euler (euler);
 
 		// And pitch
 		euler = wristPitchTransform.localRotation.eulerAngles;
-		euler.z = 0.0f;
+		euler.z = wristY - 150;
 		wristPitchTransform.localRotation = Quaternion.Euler (euler);
 
 

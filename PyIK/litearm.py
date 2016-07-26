@@ -26,9 +26,14 @@ class ArmConfig:
 
 
 class ArmPose:
+    """
+    Defines a physical configuration of a LiteArm robot arm.
+    Provides methods for:
+        - finding the required servo angle to reach the pose
+        - checking the validity of the pose
+    """
     structFormat = 'fffff'
 
-    """Defines a physical configuration of the arm"""
     def __init__(self,
                  arm_config,
                  swing_angle,
@@ -38,7 +43,9 @@ class ArmPose:
                  elbow2D,
                  wrist2D,
                  effector2D,
-                 effector):
+                 effector,
+                 wrist_x,
+                 wrist_y):
         self.cfg = arm_config
         self.swing_angle = swing_angle
         self.shoulder_angle = shoulder_angle
@@ -59,21 +66,52 @@ class ArmPose:
         self.elbow = self.shoulder + normalize(arm_vec)*elbow2D[0]
         self.elbow[1] = elbow2D[1]
         self.wrist = self.effector - normalize(arm_vec)*arm_config.wrist_length
-        # Find the servo target angles for the pose
-        self.servo_elevator = 178.21 - degrees(self.shoulder_angle)
-        self.servo_actuator = degrees(self.actuator_angle) + 204.78
-        self.servo_swing = 150 - degrees(self.swing_angle)
-        # TODO wrist servo pose
-        self.servo_wrist_x = 150
-        self.servo_wrist_y = 150
-        # Validate pose angles
-        self.arm_diff_angle = degrees(shoulder_angle - actuator_angle)
-        self.clear_diff = self.arm_diff_angle > 44
-        self.clear_elevator = self.servo_elevator > 60
-        self.clear_actuator = self.servo_actuator > 95
+        # Wrist pose
+        self.servo_wrist_x = wrist_x
+        self.servo_wrist_y = wrist_y
 
-    def fullClearance(self):
-        return self.clear_diff and self.clear_elevator and self.clear_actuator
+    def getServoElevator(self):
+        return 178.21 - degrees(self.shoulder_angle)
+
+    def getServoActuator(self):
+        return degrees(self.actuator_angle) + 204.78
+
+    def getServoSwing(self):
+        return 150 - degrees(self.swing_angle)
+
+    def armDiffAngle(self):
+        return degrees(self.shoulder_angle - self.actuator_angle)
+
+    def checkActuator(self):
+        angle = self.getServoActuator()
+        return angle >= 60 and angle <= 200
+
+    def checkDiff(self):
+        angle = self.armDiffAngle()
+        return angle >= 44 and angle <= 175
+
+    def checkElevator(self):
+        angle = self.getServoElevator()
+        return angle >= 60 and angle <= 230
+
+    def checkSwing(self):
+        angle = self.getServoSwing()
+        return angle >= 60 and angle <= 240
+
+    def checkWristX(self):
+        return self.servo_wrist_x >= 60 and self.servo_wrist_x <= 240
+
+    def checkWristY(self):
+        return self.servo_wrist_y >= 60 and self.servo_wrist_y <= 160
+
+    def checkClearance(self):
+        return
+            self.checkDiff() and
+            self.checkActuator() and
+            self.checkElevator() and
+            self.checkSwing() and
+            self.checkWristX() and
+            self.checkWristY()
 
     def serialize(self):
         """Returns a packed struct holding the pose information"""
@@ -82,10 +120,8 @@ class ArmPose:
             self.swing_angle,
             self.shoulder_angle,
             self.elbow_angle,
-            # TODO wrist yaw
-            0.0,
-            # TODO wrist pitch
-            0.0
+            self.servo_wrist_x,
+            self.servo_wrist_y
         )
 
 class ArmController:
@@ -132,15 +168,19 @@ class ArmController:
         # Current target pose
         self.target_pose = None
 
-    def disable_movement(self):
-        self.motion_enable = False
-
-    def enable_movement(self):
-        print ("Warning: Arm enabled")
-        self.motion_enable = True
+    def enableMovement(self, enable):
+        if enable and not self.motion_enable:
+            print ("Warning: Arm enabled")
+            self.motion_enable = True
+        elif not enable:
+            self.motion_enable = False
 
     def setWristGoalPosition(self, pos):
         self.ik.setGoal(pos)
+        self.ik_dirty = True
+
+    def setWristGoalDirection(self, normal):
+        self.ik.setWristDir(normal)
         self.ik_dirty = True
 
     def getIKPose(self):
@@ -166,7 +206,9 @@ class ArmController:
                 elbow2D = self.ik.elbow,
                 wrist2D = self.ik.wristpl,
                 effector2D = self.ik.goalpl,
-                effector = self.ik.goal
+                effector = self.ik.goal,
+                wrist_x = self.ik.wrist_x,
+                wrist_y = self.ik.wrist_y
             )
         return self.ik_pose
 
@@ -174,17 +216,16 @@ class ArmController:
         self.target_pose = new_pose
 
     def tick(self):
-        if self.target_pose is not None:
+        if self.target_pose is not None and self.motion_enable:
             # Drive servos
             if self.servos['swing'] is not None:
-                self.servos['swing'].setGoalPosition(self.target_pose.servo_swing)
+                self.servos['swing'].setGoalPosition(self.target_pose.getServoSwing())
             if self.servos['shoulder'] is not None:
-                self.servos['shoulder'].setGoalPosition(self.target_pose.servo_elevator)
+                self.servos['shoulder'].setGoalPosition(self.target_pose.getServoElevator())
             if self.servos['elbow'] is not None:
-                self.servos['elbow'].setGoalPosition(self.target_pose.servo_actuator)
+                self.servos['elbow'].setGoalPosition(self.target_pose.getServoActuator())
 
             if self.servos['wrist_x'] is not None:
-                angle = 150 + degrees(self.target_pose.swing_angle)
-                self.servos['wrist_x'].setGoalPosition(self.target_pose.servo_wrist_y)
+                self.servos['wrist_x'].setGoalPosition(self.target_pose.servo_wrist_x)
             if self.servos['wrist_y'] is not None:
-                self.servos['wrist_y'].setGoalPosition(self.target_pose.servo_wrist_x)
+                self.servos['wrist_y'].setGoalPosition(self.target_pose.servo_wrist_y)

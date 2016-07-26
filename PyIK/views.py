@@ -36,12 +36,15 @@ class PlaneView:
     def draw(self, pose, r):
         # Y axis
         r.drawLine(pt_l([0,0]), pt_l([0,150]), green)
+        r.drawText('y', green, pt_l([-10,170]))
         # Z axis from side
         zvec = rotate([0,1], pose.swing_angle)
         r.drawLine(pt_l([0,0]), pt_l([zvec[1]*150,0]), blue)
+        r.drawText('z', blue, pt_l([zvec[1]*150,0]))
         # X axis from side
-        xvec = rotate([1,0], pose.swing_angle)
+        xvec = rotate([-1,0], pose.swing_angle)
         r.drawLine(pt_l([0,0]), pt_l([xvec[1]*150,0]), red)
+        r.drawText('x', red, pt_l([xvec[1]*150,0]))
 
         # Base
         r.drawRect(pt_l([-30, -25]), [60, 10], gray)
@@ -82,6 +85,8 @@ class PlaneView:
         r.drawCircle(pt_l(pose.wrist2D), self.line_width, gray)
         r.drawCircle(pt_l(pose.effector2D), self.line_width, col)
 
+        # show 2D effector position
+        r.drawText(prettyVec(pose.effector2D), col, pt_l(pose.effector2D + [15,0]))
 
         # Real positions
         # Rotations from vertical
@@ -131,6 +136,13 @@ class TopView:
         self.line_width = width
 
     def draw(self, pose, r):
+        # Z axis from top
+        r.drawLine(pt_r([0,0]), pt_r([0,150]), blue)
+        r.drawText('z', blue, pt_r([-10,170]))
+        # X axis from top
+        r.drawLine(pt_r([0,0]), pt_r([150,0]), red)
+        r.drawText('x', red, pt_r([150,0]))
+
         # Base
         r.drawCircle(pt_r([0, 0]), 30, [230, 230, 230])
 
@@ -150,10 +162,10 @@ class TopView:
         #     col = red
 
         # Top-down view of shoulder, elbow and wrist points
-        shoulder = [pose.shoulder[0], pose.shoulder[2]]
-        elbow = [pose.elbow[0], pose.elbow[2]]
-        wrist = [pose.wrist[0], pose.wrist[2]]
-        effector = [pose.effector[0], pose.effector[2]]
+        shoulder = np.array([pose.shoulder[0], pose.shoulder[2]])
+        elbow = np.array([pose.elbow[0], pose.elbow[2]])
+        wrist = np.array([pose.wrist[0], pose.wrist[2]])
+        effector = np.array([pose.effector[0], pose.effector[2]])
 
         # Wrist is drawn below everything
         r.drawLine(pt_r(wrist), pt_r(effector), col, self.line_width)
@@ -165,3 +177,6 @@ class TopView:
         r.drawLine(pt_r(elbow), pt_r(wrist), col, self.line_width/2)
         # Elbow joint is above everything
         r.drawCircle(pt_r(elbow), self.line_width, gray)
+
+        # show top-down effector position
+        r.drawText(prettyVec(effector), col, pt_r(effector + [15,0]))
