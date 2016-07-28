@@ -1,3 +1,6 @@
+import pygame as pyg
+import numpy as np
+
 from util import *
 
 def pt_l(p):
@@ -32,8 +35,45 @@ class PlaneView:
     def __init__(self, color=blue, width=6):
         self.color = color
         self.line_width = width
+        self.backSurface = None
+        self.backSize = 500
+        self.reachableXOffset = 90
+
+    def renderReachableVolume(self, arm, res=50):
+        offset = self.reachableXOffset
+        size = (430-offset, self.backSize)
+        renderSurface = pyg.Surface((res, res))
+
+        y_step = size[1]/float(res)
+        x_step = size[0]/float(res)
+        for y in xrange(res):
+            for x in xrange(res):
+                pos = [0, (y-res/2)*y_step, offset + x*x_step]
+                arm.setWristGoalPosition(pos)
+                if arm.ik.valid:
+                    pose = arm.getIKPose()
+                    if pose is not None:
+                        test = pose.checkClearance()
+                    else:
+                        test = False
+                else:
+                    test = False
+
+                if test:
+                    # reachable pixel
+                    renderSurface.set_at((x,res-y-1), [210,255,210])
+                else:
+                    # unreachable
+                    renderSurface.set_at((x,res-y-1), white)
+        # scale to true size
+        self.backSurface = pyg.transform.smoothscale(renderSurface, size)
+
 
     def draw(self, pose, r):
+        if self.backSurface is not None:
+            # render the reachable area
+            r.surf.blit(self.backSurface, pt_l([self.reachableXOffset,self.backSize/2]))
+
         # Y axis
         r.drawLine(pt_l([0,0]), pt_l([0,150]), green)
         r.drawText('y', green, pt_l([-10,170]))

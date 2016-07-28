@@ -84,7 +84,7 @@ class ArmPose:
 
     def checkActuator(self):
         angle = self.getServoActuator()
-        return angle >= 60 and angle <= 200
+        return angle >= 95 and angle <= 250
 
     def checkDiff(self):
         angle = self.armDiffAngle()
@@ -104,14 +104,20 @@ class ArmPose:
     def checkWristY(self):
         return self.servo_wrist_y >= 60 and self.servo_wrist_y <= 160
 
+    def checkPositioning(self):
+        # When Y>0 Forearm always faces outwards
+        if self.wrist2D[1] > 0 and self.wrist2D[0] < self.elbow2D[0]:
+            return False
+        # No valid positions X<=0
+        if self.wrist2D[0] <= 0:
+            return False
+        return True
+
     def checkClearance(self):
-        return
-            self.checkDiff() and
-            self.checkActuator() and
-            self.checkElevator() and
-            self.checkSwing() and
-            self.checkWristX() and
-            self.checkWristY()
+        return (self.checkDiff() and self.checkActuator() and
+                self.checkElevator() and self.checkSwing() and
+                self.checkWristX() and self.checkWristY() and
+                self.checkPositioning())
 
     def serialize(self):
         """Returns a packed struct holding the pose information"""

@@ -168,6 +168,9 @@ class Kinectics:
 
         self.lastPose = None
 
+        # render the reachable area
+        self.sideView.renderReachableVolume(self.arm)
+
     def stop(self):
         self.perflog.write('ik_avg {0}\n'.format(self.ik_time_accum/self.ik_time_counter))
         self.perflog.write('serial_avg {0}\n'.format(self.serial_time_accum/self.serial_time_counter))
@@ -265,9 +268,9 @@ class Kinectics:
         self.pid.setTarget(degrees(pose.swing_angle))
 
         # Incorporate wrist orientation to pose
-        wrist_x, wrist_y = self.wristFromNormal(self.goalNormal)
-        pose.servo_wrist_x = wrist_x;
-        pose.servo_wrist_y = wrist_y;
+        # wrist_x, wrist_y = self.wristFromNormal(self.goalNormal)
+        # pose.servo_wrist_x = wrist_x;
+        # pose.servo_wrist_y = wrist_y;
 
         # Draw the PID test
         armVec = rotate(vertical, radians(self.armAngle)) * 35
@@ -275,25 +278,15 @@ class Kinectics:
         text = "Actual {d:.3f} deg".format(d = self.armAngle)
         self.r.drawText(text, gray, [600, 60])
 
+        # Find the current servo positions
         self.updateServoPositions()
-        self.displayServoPositions(black, [400, 20])
-
-        # Display critical pose angles
-        text = "Elbow differential {0:.3f} deg".format(pose.arm_diff_angle)
-        self.r.drawText(text, blue if pose.clear_diff else red, [40, 520])
-
-        text = "Elevator servo target {0:.3f} deg".format(pose.servo_elevator)
-        self.r.drawText(text, blue if pose.clear_elevator else red, [40, 540])
-
-        text = "Actuator servo target {0:.3f} deg".format(pose.servo_actuator)
-        self.r.drawText(text, blue if pose.clear_actuator else red, [40, 560])
 
         # Calculate pose
         if self.lastPose is None:
             self.lastPose = pose
         display_pose = self.lastPose
 
-        if pose.fullClearance():
+        if pose.checkClearance():
             # Update display pose
             display_pose = pose
             self.lastPose = pose
@@ -326,8 +319,26 @@ class Kinectics:
         timer = time.clock()
         self.sideView.draw(pose, self.r)
         self.topView.draw(pose, self.r)
+        # Display critical pose angles
+        text = "Elbow differential {0:.3f} deg".format(pose.armDiffAngle())
+        self.r.drawText(text, blue if pose.checkDiff() else red, [40, 520])
+
+        text = "Elevator servo target {0:.3f} deg".format(pose.getServoElevator())
+        self.r.drawText(text, blue if pose.checkElevator() else red, [40, 540])
+
+        text = "Actuator servo target {0:.3f} deg".format(pose.getServoActuator())
+        self.r.drawText(text, blue if pose.checkActuator() else red, [40, 560])
+
+        if pose.checkPositioning():
+            self.r.drawText("Pose OK", blue, [40, 580])
+        else:
+            self.r.drawText("Pose Invalid", red, [40, 580])
+        # Display servo positions
+        self.displayServoPositions(black, [400, 20])
+        # Store the render timing
         self.render_time_accum += time.clock() - timer
         self.render_time_counter += 1
+
 
 if __name__ == "__main__":
     app = Kinectics()

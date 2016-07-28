@@ -85,8 +85,8 @@ class IKSolver:
         self.len1 = len1
         self.wrist_len = wrist_len
         self.base_offset = base_offset
-        self.wrist_x = 0
-        self.wrist_y = 0
+        self.wrist_x = 150
+        self.wrist_y = 150
 
     def setWristDir(self, normal):
         """Calculates wrist orientation from a 3D target normal vector"""
