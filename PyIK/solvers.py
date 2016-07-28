@@ -85,20 +85,23 @@ class IKSolver:
         self.len1 = len1
         self.wrist_len = wrist_len
         self.base_offset = base_offset
-        self.wrist_x = 150
-        self.wrist_y = 150
+        self.wrist_x = 0.0
+        self.wrist_y = 0.0
+        self.wrist_normal = np.array([0,0,1])
 
     def setWristDir(self, normal):
-        """Calculates wrist orientation from a 3D target normal vector"""
-        # horizontal, vertical
-        # positive Z is forward/150deg
-        # zero Y is flat/150deg
-        # Y low 160 - high 60
-        # X low 60 - high 240
+        """Stores a 3D target normal vector - used to angle the wrist joint"""
+        self.wrist_normal = normal
+        self.calcWristAngles()
 
-        #TODO
-        self.wrist_x = 150
-        self.wrist_y = 150
+    def calcWristAngles(self):
+        """
+        Calculate the yaw and pitch for the wrist joints to reach the desired
+        wrist normal direction
+        """
+        (x,y,z) = self.wrist_normal
+        self.wrist_x = np.pi/2 - np.arctan2(z, x) - self.swing
+        self.wrist_y = np.arctan2(y, z)
 
     def setGoal(self, goal):
         """
@@ -182,5 +185,7 @@ class IKSolver:
                 self.elbow = points[1]
         else:
             self.valid = False
+        # Recalculate wrist angles
+        self.calcWristAngles()
         # Return the validity flag
         return self.valid

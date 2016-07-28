@@ -67,8 +67,8 @@ class ArmPose:
         self.elbow[1] = elbow2D[1]
         self.wrist = self.effector - normalize(arm_vec)*arm_config.wrist_length
         # Wrist pose
-        self.servo_wrist_x = wrist_x
-        self.servo_wrist_y = wrist_y
+        self.wristXAngle = wrist_x
+        self.wristYAngle = wrist_y
 
     def getServoElevator(self):
         return 178.21 - degrees(self.shoulder_angle)
@@ -78,6 +78,12 @@ class ArmPose:
 
     def getServoSwing(self):
         return 150 - degrees(self.swing_angle)
+
+    def getServoWristX(self):
+        return 150 - degrees(self.wristXAngle)
+
+    def getServoWristY(self):
+        return 150 - degrees(self.wristYAngle)
 
     def armDiffAngle(self):
         return degrees(self.shoulder_angle - self.actuator_angle)
@@ -99,10 +105,12 @@ class ArmPose:
         return angle >= 60 and angle <= 240
 
     def checkWristX(self):
-        return self.servo_wrist_x >= 60 and self.servo_wrist_x <= 240
+        angle = self.getServoWristX()
+        return angle >= 60 and angle <= 240
 
     def checkWristY(self):
-        return self.servo_wrist_y >= 60 and self.servo_wrist_y <= 160
+        angle = self.getServoWristY()
+        return angle >= 60 and angle <= 160
 
     def checkPositioning(self):
         # When Y>0 Forearm always faces outwards
@@ -126,8 +134,8 @@ class ArmPose:
             self.swing_angle,
             self.shoulder_angle,
             self.elbow_angle,
-            self.servo_wrist_x,
-            self.servo_wrist_y
+            self.wristXAngle,
+            self.wristYAngle
         )
 
 class ArmController:
@@ -232,6 +240,6 @@ class ArmController:
                 self.servos['elbow'].setGoalPosition(self.target_pose.getServoActuator())
 
             if self.servos['wrist_x'] is not None:
-                self.servos['wrist_x'].setGoalPosition(self.target_pose.servo_wrist_x)
+                self.servos['wrist_x'].setGoalPosition(self.target_pose.getServoWristX())
             if self.servos['wrist_y'] is not None:
-                self.servos['wrist_y'].setGoalPosition(self.target_pose.servo_wrist_y)
+                self.servos['wrist_y'].setGoalPosition(self.target_pose.getServoWristY())

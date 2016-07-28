@@ -58,13 +58,13 @@ public class SocketTest : MonoBehaviour {
 		Vector3 pos = transform.InverseTransformPoint(interactionTargetTransform.position);
 
         // enable
-        send_raw[0] = Convert.ToByte(false);
+        send_raw[0] = Convert.ToByte(true);
         send_raw[1] = 0;
         send_raw[2] = 0;
         send_raw[3] = 0;
         // goal pos
         System.BitConverter.GetBytes(pos.x).CopyTo(send_raw, 4);
-		System.BitConverter.GetBytes(pos.y).CopyTo(send_raw, 4 + 1*sizeof(float));
+		System.BitConverter.GetBytes(pos.y - 0.0296f).CopyTo(send_raw, 4 + 1*sizeof(float));
 		System.BitConverter.GetBytes(pos.z).CopyTo(send_raw, 4 + 2*sizeof(float));
         // goal orient
         System.BitConverter.GetBytes(norm.x).CopyTo(send_raw, 4 + 3*sizeof(float));
@@ -83,8 +83,8 @@ public class SocketTest : MonoBehaviour {
 			shoulderAngle = System.BitConverter.ToSingle(rawData, 0) * Mathf.Rad2Deg;
 			mainArmAngle = System.BitConverter.ToSingle(rawData, 4) * Mathf.Rad2Deg;
 			forearmAngle = System.BitConverter.ToSingle(rawData, 8) * Mathf.Rad2Deg;
-            wristX = System.BitConverter.ToSingle(rawData, 12);
-            wristY = System.BitConverter.ToSingle(rawData, 16);
+            wristX = System.BitConverter.ToSingle(rawData, 12) * Mathf.Rad2Deg;
+            wristY = System.BitConverter.ToSingle(rawData, 16) * Mathf.Rad2Deg;
 		}
 
 		// Set the arm configuration
@@ -108,12 +108,12 @@ public class SocketTest : MonoBehaviour {
 
 		// Wrist's lateral movement
 		euler = wristYawTransform.localRotation.eulerAngles;
-		euler.y = wristX - 150;
+		euler.y = wristX;
 		wristYawTransform.localRotation = Quaternion.Euler (euler);
 
 		// And pitch
 		euler = wristPitchTransform.localRotation.eulerAngles;
-		euler.z = wristY - 150;
+		euler.z = wristY;
 		wristPitchTransform.localRotation = Quaternion.Euler (euler);
 
 

@@ -125,6 +125,10 @@ class PlaneView:
         r.drawCircle(pt_l(pose.wrist2D), self.line_width, gray)
         r.drawCircle(pt_l(pose.effector2D), self.line_width, col)
 
+        # Wrist
+        wrist_vec = rotate(horizontal, pose.wristYAngle) * 20
+        r.drawLine(pt_l(pose.effector2D), pt_l(pose.effector2D + wrist_vec), col)
+
         # show 2D effector position
         r.drawText(prettyVec(pose.effector2D), col, pt_l(pose.effector2D + [15,0]))
 
@@ -217,6 +221,10 @@ class TopView:
         r.drawLine(pt_r(elbow), pt_r(wrist), col, self.line_width/2)
         # Elbow joint is above everything
         r.drawCircle(pt_r(elbow), self.line_width, gray)
+
+        # Wrist joint
+        wrist_vec = rotate(vertical, pose.swing_angle + pose.wristXAngle) * 20
+        r.drawLine(pt_r(effector), pt_r(effector + wrist_vec), col)
 
         # show top-down effector position
         r.drawText(prettyVec(effector), col, pt_r(effector + [15,0]))
