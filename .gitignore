@@ -45,6 +45,10 @@ Desktop.ini
 
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
- 
+
 # Python
 *.pyc
+*.hex
+*.buildinfo
+Arduino/Comms/Debug/Comms.ino.elf
+Arduino/Comms/__vm/

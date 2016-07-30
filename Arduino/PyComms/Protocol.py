@@ -23,8 +23,7 @@ class Servo:
             if self.serial.in_waiting >= num_bytes:
                 return
 
-        print("Timeout")
-        #raise Exception('Timeout')
+        raise Exception('Timeout')
 
     def tryRead(self, num_bytes, timeout=0.05):
         start = time.time()
