@@ -4,7 +4,7 @@ import threading
 import binascii
 import time
 
-ser = serial.Serial('COM3', 1000000)
+ser = serial.Serial('COM3', 250000)
 
 def checksum(bytes):
     sum = 0

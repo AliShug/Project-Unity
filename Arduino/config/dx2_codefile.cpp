@@ -200,12 +200,14 @@ void {{cname}}::sendPacket() {
     }
     //TemplateSerial.write((char*) _packet_data, _packet_length + 7);
     //TemplateSerial.flush();
-    //delayMicroseconds({{cname|upper}}_TX_DELAY_TIME);
-    // for (int i = 0; i < 5; i++) {
-    //     TemplateSerial.write(0);
-    // }
+
     // Ensure output completed before we switch comm modes
-    TemplateSerial.flush();
+    //TemplateSerial.flush(); // hangs sometimes...
+    __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t");
+    __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t");
+    __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t");
+    __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t");
+    __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t");
     digitalWrite(CommPin, 0);
     // Clear 'reflected' bytes
     while (TemplateSerial.available())

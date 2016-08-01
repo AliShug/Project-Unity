@@ -10,6 +10,7 @@ waitTime = 0.01
 
 class Servo:
     def __init__(self, serial, protocol_ver, id):
+        print(protocol_ver)
         self.protocol = protocol_ver
         self.id = id
         self.serial = serial
@@ -23,8 +24,7 @@ class Servo:
             if self.serial.in_waiting >= num_bytes:
                 return
 
-        print("Timeout")
-        #raise Exception('Timeout')
+        raise Exception('Timeout')
 
     def tryRead(self, num_bytes, timeout=0.05):
         start = time.time()
@@ -94,6 +94,74 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
             arg = struct.pack('f', val)
+        )
+        self.serial.write(command)
+        self.waitFor(2)
+
+        # Response
+        res = 'ERROR: Nothing received'
+        while self.serial.in_waiting > 0:
+            res = self.serial.readline()
+        if res.startswith('ERROR'):
+            print (res)
+            return False
+        return True
+    def setCWMargin(self, val):
+        command = 's+{pver}{packedid}{arg}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id),
+            arg = struct.pack('i', val)
+        )
+        self.serial.write(command)
+        self.waitFor(2)
+
+        # Response
+        res = 'ERROR: Nothing received'
+        while self.serial.in_waiting > 0:
+            res = self.serial.readline()
+        if res.startswith('ERROR'):
+            print (res)
+            return False
+        return True
+    def setCCWMargin(self, val):
+        command = 's_{pver}{packedid}{arg}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id),
+            arg = struct.pack('i', val)
+        )
+        self.serial.write(command)
+        self.waitFor(2)
+
+        # Response
+        res = 'ERROR: Nothing received'
+        while self.serial.in_waiting > 0:
+            res = self.serial.readline()
+        if res.startswith('ERROR'):
+            print (res)
+            return False
+        return True
+    def setCWSlope(self, val):
+        command = 's-{pver}{packedid}{arg}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id),
+            arg = struct.pack('i', val)
+        )
+        self.serial.write(command)
+        self.waitFor(2)
+
+        # Response
+        res = 'ERROR: Nothing received'
+        while self.serial.in_waiting > 0:
+            res = self.serial.readline()
+        if res.startswith('ERROR'):
+            print (res)
+            return False
+        return True
+    def setCCWSlope(self, val):
+        command = 's={pver}{packedid}{arg}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id),
+            arg = struct.pack('i', val)
         )
         self.serial.write(command)
         self.waitFor(2)
@@ -282,6 +350,86 @@ class Servo:
                 return None
             arg = self.tryRead(4)
             val = struct.unpack('f', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getCWMargin(self):
+        command = 'g+{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        self.serial.write(command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('i', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getCCWMargin(self):
+        command = 'g_{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        self.serial.write(command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('i', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getCWSlope(self):
+        command = 'g-{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        self.serial.write(command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('i', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getCCWSlope(self):
+        command = 'g={pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        self.serial.write(command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
             print ('ERR: Bad receive', e)

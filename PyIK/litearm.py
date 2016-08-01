@@ -170,7 +170,13 @@ class ArmController:
             if servo is None:
                 print ("Warning: {0} servo not connected".format(key))
             else:
-                servo.setGoalSpeed(0.4)
+                # Make sure the goal speed is set
+                while not servo.setGoalSpeed(-0.1):
+                    pass
+                if servo.protocol == 1:
+                    print("Setting slope")
+                    servo.setCWSlope(0)
+                    servo.setCCWSlope(0)
         # Store parameters
         self.motion_enable = False
         self.cfg = arm_config
@@ -225,6 +231,37 @@ class ArmController:
                 wrist_y = self.ik.wrist_y
             )
         return self.ik_pose
+
+    def pollServos(self):
+        """Poll the real-world servo positions"""
+        for servo in self.servos.itervalues():
+            if servo is not None:
+                newPos = servo.getPosition()
+                if type(newPos) is float:
+                    servo.data['pos'] = newPos
+
+    def getRealPose(self):
+        """Retrieve the real-world arm pose"""
+        if any([servo is None for servo in servos.itervalues()]):
+            return None
+
+        # This whole function is essentially just FK based on the known servo
+        # angles
+        swing_servo = self.servos['swing'].data['pos']
+        shoulder_servo = self.servos['shoulder'].data['pos']
+        actuator_servo = self.servos['actuator'].data['pos']
+        wrist_x_servo = self.servos['wrist_x'].data['pos']
+        wrist_y_servo = self.servos['wrist_y'].data['pos']
+
+        # Solve elbow angle for given actuator angle
+        elbow_angle = self.physsolver.solve_forearm(shoulder_angle, actuator_angle)
+
+        pose = ArmPose(
+            self.cfg,
+            swing_angle, shoulder_angle, actuator_angle,
+            elbow_angle, elbow2D, wrist2D, effector2D,
+            effector, wrist_x_angle, wrist_y_angle)
+        return pose
 
     def setTargetPose(self, new_pose):
         self.target_pose = new_pose

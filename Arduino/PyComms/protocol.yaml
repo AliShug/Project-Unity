@@ -1,0 +1,68 @@
+# Defines a protocol for communication between the computer and Arduino
+basic-com: &base
+    1: True
+    2: True
+    can_get: True
+    can_set: False
+    type: int
+
+commands:
+    -   <<: *base
+        name: Voltage
+        short: v
+        type: float
+    -   <<: *base
+        name: Position
+        short: p
+        type: float
+    -   <<: *base
+        name: Load
+        short: l
+        type: float
+    -   <<: *base
+        name: Temperature
+        short: t
+    -   <<: *base
+        name: Speed
+        short: s
+        type: float
+    -   <<: *base
+        name: GoalPosition
+        short: P
+        can_set: True
+        type: float
+    -   <<: *base
+        name: GoalSpeed
+        short: S
+        can_set: True
+        type: float
+    -   <<: *base
+        name: LED
+        short: e
+        can_set: True
+    -   <<: *base
+        name: MaxTorque
+        short: q
+        can_set: True
+        type: float
+
+    -   <<: *base
+        name: CWMargin
+        2: False
+        short: '+'
+        can_set: True
+    -   <<: *base
+        name: CCWMargin
+        2: False
+        short: '_'
+        can_set: True
+    -   <<: *base
+        name: CWSlope
+        2: False
+        short: '-'
+        can_set: True
+    -   <<: *base
+        name: CCWSlope
+        2: False
+        short: '='
+        can_set: True

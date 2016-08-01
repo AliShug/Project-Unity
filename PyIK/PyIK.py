@@ -211,11 +211,6 @@ class Kinectics:
                 print ("Socket error: {0}".format(err))
         self.sockOut.send(self.arm.getIKPose().serialize())
 
-    def updateServoPositions(self):
-        for servo in self.servos.itervalues():
-            if servo is not None:
-                servo.data['pos'] = servo.getPosition()
-
     def tick(self):
         if self.stopped:
             return
@@ -279,7 +274,7 @@ class Kinectics:
         self.r.drawText(text, gray, [600, 60])
 
         # Find the current servo positions
-        self.updateServoPositions()
+        self.arm.pollServos()
 
         # Calculate pose
         if self.lastPose is None:

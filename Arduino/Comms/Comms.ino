@@ -30,6 +30,9 @@ int nx2 = 0;
 
 // Init - Find servos
 void setup() {
+    pinMode(2, OUTPUT);
+    digitalWrite(2, 0);
+
     DX1Motor::Init(DX1MOTOR_BAUD_1MBS, 2);
     DX2Motor::Init(DX2MOTOR_BAUD_1MBS, 2);
     Serial.begin(250000);

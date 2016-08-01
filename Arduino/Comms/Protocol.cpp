@@ -5,18 +5,6 @@
 
 #include "Protocol.h"
 
-bool microWait(Stream &s, unsigned long timeUs) {
-    unsigned long start = micros();
-
-    do {
-        if (s.peek() >= 0) {
-            return true;
-        }
-    } while (micros() - start < timeUs);
-
-    return false;
-}
-
 Protocol::Protocol(DX1Motor *x1s, int nx1, DX2Motor *x2s, int nx2) {
     _x1s = x1s;
     _x2s = x2s;
@@ -78,6 +66,50 @@ void Protocol::dispatchV1Command(Stream &s, int mode, char command, char id) {
             case 'q': {
                 float val = _argf;
                 err = _x1s[id].setMaxTorque(val);
+                if (err != DX1MOTOR_ERR_OK) {
+                    s.print("ERROR ");
+                    s.println(err);
+                }
+                else {
+                    s.println("k");
+                }
+            } break;
+            case '+': {
+                long val = _argi;
+                err = _x1s[id].setCWMargin(val);
+                if (err != DX1MOTOR_ERR_OK) {
+                    s.print("ERROR ");
+                    s.println(err);
+                }
+                else {
+                    s.println("k");
+                }
+            } break;
+            case '_': {
+                long val = _argi;
+                err = _x1s[id].setCCWMargin(val);
+                if (err != DX1MOTOR_ERR_OK) {
+                    s.print("ERROR ");
+                    s.println(err);
+                }
+                else {
+                    s.println("k");
+                }
+            } break;
+            case '-': {
+                long val = _argi;
+                err = _x1s[id].setCWSlope(val);
+                if (err != DX1MOTOR_ERR_OK) {
+                    s.print("ERROR ");
+                    s.println(err);
+                }
+                else {
+                    s.println("k");
+                }
+            } break;
+            case '=': {
+                long val = _argi;
+                err = _x1s[id].setCCWSlope(val);
                 if (err != DX1MOTOR_ERR_OK) {
                     s.print("ERROR ");
                     s.println(err);
@@ -233,6 +265,74 @@ void Protocol::dispatchV1Command(Stream &s, int mode, char command, char id) {
             case 'q': {
                 float res;
                 res = _x1s[id].getMaxTorque(err);
+                if (err != DX1MOTOR_ERR_OK) {
+                    s.print("ERROR ");
+                    s.println(err);
+                }
+                else {
+                    s.print('k');
+                    char *ptr = (char*)&res;
+                    s.write(ptr[0]);
+                    s.write(ptr[1]);
+                    s.write(ptr[2]);
+                    s.write(ptr[3]);
+                    //s.write('\n');
+                }
+            } break;
+            case '+': {
+                long res;
+                res = _x1s[id].getCWMargin(err);
+                if (err != DX1MOTOR_ERR_OK) {
+                    s.print("ERROR ");
+                    s.println(err);
+                }
+                else {
+                    s.print('k');
+                    char *ptr = (char*)&res;
+                    s.write(ptr[0]);
+                    s.write(ptr[1]);
+                    s.write(ptr[2]);
+                    s.write(ptr[3]);
+                    //s.write('\n');
+                }
+            } break;
+            case '_': {
+                long res;
+                res = _x1s[id].getCCWMargin(err);
+                if (err != DX1MOTOR_ERR_OK) {
+                    s.print("ERROR ");
+                    s.println(err);
+                }
+                else {
+                    s.print('k');
+                    char *ptr = (char*)&res;
+                    s.write(ptr[0]);
+                    s.write(ptr[1]);
+                    s.write(ptr[2]);
+                    s.write(ptr[3]);
+                    //s.write('\n');
+                }
+            } break;
+            case '-': {
+                long res;
+                res = _x1s[id].getCWSlope(err);
+                if (err != DX1MOTOR_ERR_OK) {
+                    s.print("ERROR ");
+                    s.println(err);
+                }
+                else {
+                    s.print('k');
+                    char *ptr = (char*)&res;
+                    s.write(ptr[0]);
+                    s.write(ptr[1]);
+                    s.write(ptr[2]);
+                    s.write(ptr[3]);
+                    //s.write('\n');
+                }
+            } break;
+            case '=': {
+                long res;
+                res = _x1s[id].getCCWSlope(err);
                 if (err != DX1MOTOR_ERR_OK) {
                     s.print("ERROR ");
                     s.println(err);
@@ -482,7 +582,7 @@ void Protocol::handleIncoming(Stream &s) {
     const int bLen = 128;
     char buffer[bLen];
     int ind = 0;
-    while (microWait(s, 40) && ind < bLen) {
+    while (waitTimeout(s, 3) && ind < bLen) {
         char b = s.read();
         if (b == 0 && ind == 0) continue;
         buffer[ind++] = b;
@@ -511,8 +611,7 @@ void Protocol::handleIncoming(Stream &s) {
             int err, id;
             id = _x1s[i].getID(err);
             if (err != DX1MOTOR_ERR_OK) {
-                s.print("ERROR: ");
-                s.println(err, BIN);
+                s.println("ERROR: No response");
             }
             else {
                 s.println(i);
@@ -524,8 +623,7 @@ void Protocol::handleIncoming(Stream &s) {
             int err, id;
             id = _x2s[i].getID(err);
             if (err != DX2MOTOR_ERR_OK) {
-                s.print("ERROR: ");
-                s.println(err, BIN);
+                s.println("ERROR: No response");
             }
             else {
                 s.println(i);

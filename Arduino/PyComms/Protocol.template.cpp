@@ -30,7 +30,7 @@ void Protocol::dispatchV{{version}}Command(Stream &s, int mode, char command, ch
 
     if (mode == MODE_SET) {
         switch (command) {
-            {% for c in commands if c.can_set %}
+            {% for c in commands if c.can_set and c[version] %}
             case '{{c.short}}': {
                 {% if c.type == 'float' %}
                 float val = _argf;
@@ -55,7 +55,7 @@ void Protocol::dispatchV{{version}}Command(Stream &s, int mode, char command, ch
     }
     else if (mode == MODE_GET) {
         switch (command) {
-            {% for c in commands if c.can_get %}
+            {% for c in commands if c.can_get and c[version] %}
             case '{{c.short}}': {
                 {% if c.type == 'float' %}
                 float res;
