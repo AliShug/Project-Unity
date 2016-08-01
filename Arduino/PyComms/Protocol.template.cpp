@@ -95,18 +95,10 @@ void Protocol::handleIncoming(Stream &s) {
     if (s.peek() < 0) return;
 
     // Get command string
-    const int bLen = 128;
-    char buffer[bLen];
-    int ind = 0;
-    while (waitTimeout(s, 3) && ind < bLen) {
-        char b = s.read();
-        if (b == 0 && ind == 0) continue;
-        buffer[ind++] = b;
-    }
-
-    if (ind < 4) {
-        // Noise, probably
-        return;
+    char buffer[64];
+    int commandLen = s.read();
+    for (int i = 0; i < commandLen; i++) {
+        buffer[i] = s.read();
     }
 
     // First character indicates get/set mode (or special commands)
@@ -148,7 +140,7 @@ void Protocol::handleIncoming(Stream &s) {
         return;
     default:
         s.print("ERROR: Mode error ");
-        s.println((int)read);
+        s.println(read);
         return;
     }
 
@@ -161,7 +153,7 @@ void Protocol::handleIncoming(Stream &s) {
     char targ_id = buffer[3];
 
     if (mode == MODE_SET) {
-        if (ind < 8) {
+        if (commandLen < 8) {
             s.println("ERROR: Arguments required");
             return;
         }

@@ -22,6 +22,10 @@ from util import *
 RECV_PORT = 14001
 TRAN_PORT = 14002
 
+MAX_SPEED = 25.0
+
+import pdb;
+
 class Kinectics:
     def findSerial(self):
         ports = ['COM{0}'.format(i+1) for i in range(256)]
@@ -97,8 +101,11 @@ class Kinectics:
             timer = time.clock()
             # Set relatively high timeout for this section of board comms
             comm.timeout = 3
-            comm.write("list")
+            command = "list"
+            l = struct.pack('b', len(command))
+            comm.write(l + command)
             read = comm.readline()
+            print(">"+read)
             x1num = int(read.split('=')[1])
             for i in range(x1num):
                 str = comm.readline()
@@ -164,9 +171,12 @@ class Kinectics:
         self.armAngle = 0
         self.pid = PIDControl(5, 0, 0)
 
-        self.curGoal = [0, 50, 200]
-        self.curDir = np.array([0, 0])
+        self.curGoal = np.array([0.0, 50.0, 200.0])
+        self.ikTarget = np.array([0.0, 50.0, 200.0])
+        self.curDir = [0.0, 0.0]
         self.goalNormal = [0, 0, 1]
+
+        self.lerpSpeed = 0
 
         self.lastPose = None
 
@@ -206,7 +216,7 @@ class Kinectics:
                 #print(data)
                 newGoal = goalPos*1000
                 printVec(self.goalNormal)
-                self.curGoal = newGoal
+                self.curGoal = np.array(newGoal)
 
 
             except socket.error as err:
@@ -216,6 +226,21 @@ class Kinectics:
             self.sockOut.send(realPose.serialize())
         else:
             self.sockOut.send(self.arm.getIKPose().serialize())
+
+    def lerpIKTarget(self):
+        #pdb.set_trace()
+        delta = np.subtract(self.curGoal, self.ikTarget)
+        dist = np.linalg.norm(delta)
+        if (dist < 0.001):
+            self.lerpSpeed = 0
+            return
+        else:
+            # acceleration
+            self.lerpSpeed += 0.5
+            curMax = MAX_SPEED*(0.03 + 0.97*min(1, 0.007*dist))
+            if self.lerpSpeed > curMax:
+                self.lerpSpeed = curMax
+            self.ikTarget = self.ikTarget + normalize(delta)*min(dist, self.lerpSpeed)
 
     def tick(self):
         if self.stopped:
@@ -258,9 +283,12 @@ class Kinectics:
         # Simulated arm swing - PID test
         self.armAngle -= 0.01 * self.pid.stepOutput(self.armAngle)
 
+        # Lerp towards target
+        self.lerpIKTarget()
+        printVec(self.ikTarget)
         # IK - calculate swing and elbow pos using goal pos
         timer = time.clock()
-        self.arm.setWristGoalPosition(self.curGoal)
+        self.arm.setWristGoalPosition(self.ikTarget)
         self.arm.setWristGoalDirection(self.goalNormal)
         self.ik_time_accum += time.clock()-timer
         self.ik_time_counter += 1

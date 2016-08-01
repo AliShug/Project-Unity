@@ -6,6 +6,10 @@ import struct
 import solvers
 from util import *
 
+MOTORSPEED = 0.4
+MOTORMARGIN = 1
+MOTORSLOPE = 100
+
 class ArmConfig:
     """Holds an arm's proportions, limits and other configuration data"""
     def __init__(self,
@@ -195,12 +199,14 @@ class ArmController:
                 print ("Warning: {0} servo not connected".format(key))
             else:
                 # Make sure the goal speed is set
-                while not servo.setGoalSpeed(-0.1):
+                while not servo.setGoalSpeed(-MOTORSPEED):
                     pass
                 if servo.protocol == 1:
                     print("Setting slope")
-                    servo.setCWSlope(0)
-                    servo.setCCWSlope(0)
+                    servo.setCWMargin(MOTORSLOPE)
+                    servo.setCCWMargin(MOTORSLOPE)
+                    servo.setCWSlope(MOTORMARGIN)
+                    servo.setCCWSlope(MOTORMARGIN)
         # Store parameters
         self.motion_enable = False
         self.cfg = arm_config

@@ -43,7 +43,8 @@ class Servo:
             packedid = struct.pack('B', self.id),
             arg = struct.pack('f', val)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(2)
 
         # Response
@@ -60,7 +61,8 @@ class Servo:
             packedid = struct.pack('B', self.id),
             arg = struct.pack('f', val)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(2)
 
         # Response
@@ -77,7 +79,8 @@ class Servo:
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(2)
 
         # Response
@@ -94,7 +97,8 @@ class Servo:
             packedid = struct.pack('B', self.id),
             arg = struct.pack('f', val)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(2)
 
         # Response
@@ -111,7 +115,8 @@ class Servo:
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(2)
 
         # Response
@@ -128,7 +133,8 @@ class Servo:
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(2)
 
         # Response
@@ -145,7 +151,8 @@ class Servo:
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(2)
 
         # Response
@@ -162,7 +169,8 @@ class Servo:
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(2)
 
         # Response
@@ -178,7 +186,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -198,7 +207,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -218,7 +228,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -238,7 +249,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -258,7 +270,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -278,7 +291,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -298,7 +312,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -318,7 +333,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -338,7 +354,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -358,7 +375,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -378,7 +396,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -398,7 +417,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
@@ -418,7 +438,8 @@ class Servo:
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
-        self.serial.write(command)
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
         self.waitFor(5)
 
         # Retreive response
