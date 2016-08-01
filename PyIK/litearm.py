@@ -28,11 +28,35 @@ class ArmConfig:
 class ArmPose:
     """
     Defines a physical configuration of a LiteArm robot arm.
+    Internal angles are relative to vertical (elevator/actuator) or straight
+    forward (swing), and are stored in radians. Extracted servo angles range
+    0-300 and are measured in degrees.
+
     Provides methods for:
-        - finding the required servo angle to reach the pose
+        - finding the required servo angles to reach the pose
         - checking the validity of the pose
     """
     structFormat = 'fffff'
+
+    @staticmethod
+    def calcElevatorAngle(servoAngle):
+        return radians(178.21 - servoAngle)
+
+    @staticmethod
+    def calcSwingAngle(servoAngle):
+        return radians(150.0 - servoAngle)
+
+    @staticmethod
+    def calcActuatorAngle(servoAngle):
+        return radians(servoAngle - 204.78)
+
+    @staticmethod
+    def calcWristXAngle(servoAngle):
+        return radians(150.0 - servoAngle)
+
+    @staticmethod
+    def calcWristYAngle(servoAngle):
+        return radians(servoAngle - 150.0)
 
     def __init__(self,
                  arm_config,
@@ -83,7 +107,7 @@ class ArmPose:
         return 150 - degrees(self.wristXAngle)
 
     def getServoWristY(self):
-        return 150 - degrees(self.wristYAngle)
+        return 150 + degrees(self.wristYAngle)
 
     def armDiffAngle(self):
         return degrees(self.shoulder_angle - self.actuator_angle)
@@ -241,24 +265,43 @@ class ArmController:
                     servo.data['pos'] = newPos
 
     def getRealPose(self):
-        """Retrieve the real-world arm pose"""
-        if any([servo is None for servo in servos.itervalues()]):
+        """Retrieve the real-world arm pose, or None if not all servos are
+        connected.
+        """
+        if any([servo is None for servo in self.servos.itervalues()]):
             return None
 
         # This whole function is essentially just FK based on the known servo
         # angles
         swing_servo = self.servos['swing'].data['pos']
-        shoulder_servo = self.servos['shoulder'].data['pos']
-        actuator_servo = self.servos['actuator'].data['pos']
+        elevator_servo = self.servos['shoulder'].data['pos']
+        actuator_servo = self.servos['elbow'].data['pos']
         wrist_x_servo = self.servos['wrist_x'].data['pos']
         wrist_y_servo = self.servos['wrist_y'].data['pos']
 
-        # Solve elbow angle for given actuator angle
-        elbow_angle = self.physsolver.solve_forearm(shoulder_angle, actuator_angle)
+        # Find the internal arm-pose angles for the given servo positions
+        swing_angle = ArmPose.calcSwingAngle(swing_servo)
+        elevator_angle = ArmPose.calcElevatorAngle(elevator_servo)
+        actuator_angle = ArmPose.calcActuatorAngle(actuator_servo)
+        wrist_x_angle = ArmPose.calcWristXAngle(wrist_x_servo)
+        wrist_y_angle = ArmPose.calcWristYAngle(wrist_y_servo)
+        # Solve elbow angle for given actuator and elevator angles
+        # (this is the angle from the elevator arm's direction to the forearm's)
+        elbow_angle = self.physsolver.solve_forearm(elevator_angle, actuator_angle)
+
+        # FK positions from config and angles
+        offset = self.cfg.shoulder_offset
+        shoulder2D = np.array([offset[1], 0])
+        elbow2D = shoulder2D + rotate(vertical, elevator_angle)*self.cfg.main_length
+        wrist2D = elbow2D + rotate(vertical, elevator_angle + elbow_angle)*self.cfg.forearm_length
+        effector2D = wrist2D + [self.cfg.wrist_length, 0]
+        # 3D Effector calculation is a little more involved
+        td = rotate([offset[0], effector2D[0]], swing_angle)
+        effector = np.array([td[0], effector2D[1], td[1]])
 
         pose = ArmPose(
             self.cfg,
-            swing_angle, shoulder_angle, actuator_angle,
+            swing_angle, elevator_angle, actuator_angle,
             elbow_angle, elbow2D, wrist2D, effector2D,
             effector, wrist_x_angle, wrist_y_angle)
         return pose

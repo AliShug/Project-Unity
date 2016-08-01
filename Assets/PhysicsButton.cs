@@ -16,6 +16,8 @@ public class PhysicsButton : PhysicsInput {
 	private Light myLight = null;
 
 	protected override void OnStart() {
+        base.OnStart();
+
 		myRenderer = GetComponent<Renderer>();
 		myLight = GetComponent<Light>();
 
@@ -43,6 +45,7 @@ public class PhysicsButton : PhysicsInput {
 	 * Called when the object physically enters its depressed (clicked) state
 	 */
 	protected override void OnClickEnter() {
+        base.OnClickEnter();
 		currentColor = pressedColor;
 		ColorUpdate();
 	}
@@ -51,6 +54,7 @@ public class PhysicsButton : PhysicsInput {
 	 * Called when the object physically leaves its depressed state
 	 */
 	protected override void OnClickExit() {
+        base.OnClickExit();
 		if (Hovered)
 			currentColor = hoverColor;
 		else
@@ -59,11 +63,13 @@ public class PhysicsButton : PhysicsInput {
 	}
 
 	protected override void OnHoverEnter() {
+        base.OnHoverEnter();
 		currentColor = hoverColor;
 		ColorUpdate();
 	}
 
 	protected override void OnHoverExit() {
+        base.OnHoverExit();
 		currentColor = baseColor;
 		ColorUpdate();
 	}

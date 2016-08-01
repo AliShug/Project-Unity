@@ -6,27 +6,29 @@ using MeshExtensions; // custom extension methods
 
 public class PhysicsInputManager : MonoBehaviour {
 
+    public bool holdTarget = false;
+
 	public Transform displayTargetWidget;
 	public Transform displayBoneWidget;
 	public RigidHand[] hands;
 
 	public float hoverDistance = 0.1f;
 
-	private PhysicsInput _lastHovered;
+	private InteractiveObject _lastHovered;
 	
 	// Update is called once per frame
 	void Update () {
 		// Grab the current child input components
-		PhysicsInput[] childInputs = transform.GetComponentsInChildren<PhysicsInput>();
+		InteractiveObject[] childInputs = transform.GetComponentsInChildren<InteractiveObject>();
 
 		float closestDist = hoverDistance;
 		Vector3 closestPoint = new Vector3();
 		Vector3 closestNormal = new Vector3();
 		Transform closestBone = null;
-		PhysicsInput targetInput = null;
+		InteractiveObject targetInput = null;
 
 		// We cycle through every finger-end collider in both hands and for all inputs to find the likely interaction target
-		foreach (PhysicsInput input in childInputs) {
+		foreach (InteractiveObject input in childInputs) {
 			foreach (RigidHand hand in hands) {
 				if (hand.isActiveAndEnabled) {
 					foreach (RigidFinger finger in hand.fingers) {
@@ -63,8 +65,7 @@ public class PhysicsInputManager : MonoBehaviour {
 				_lastHovered = targetInput;
 			}
 
-			// Debug display
-			if (displayTargetWidget) {
+			if (displayTargetWidget && !holdTarget) {
 				displayTargetWidget.gameObject.SetActive(true);
 				displayTargetWidget.position = closestPoint;
 				Vector3 normalTarget = closestPoint + targetInput.transform.TransformDirection(closestNormal);

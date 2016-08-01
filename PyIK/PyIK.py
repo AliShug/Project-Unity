@@ -157,7 +157,9 @@ class Kinectics:
             arm_config = litearm.ArmConfig())
 
         self.sideView = views.PlaneView(width=10)
+        self.realSideView = views.PlaneView(width=5, color=gray)
         self.topView = views.TopView(width=12)
+        self.realTopView = views.TopView(width=6, color=gray)
 
         self.armAngle = 0
         self.pid = PIDControl(5, 0, 0)
@@ -209,7 +211,11 @@ class Kinectics:
 
             except socket.error as err:
                 print ("Socket error: {0}".format(err))
-        self.sockOut.send(self.arm.getIKPose().serialize())
+        realPose = self.arm.getRealPose()
+        if realPose is not None:
+            self.sockOut.send(realPose.serialize())
+        else:
+            self.sockOut.send(self.arm.getIKPose().serialize())
 
     def tick(self):
         if self.stopped:
@@ -293,7 +299,11 @@ class Kinectics:
             self.serial_time_counter += 1
 
         # Update the views
+        realPose = self.arm.getRealPose()
         self.drawViews(display_pose)
+        if realPose is not None:
+            self.realSideView.draw(realPose, self.r)
+            self.realTopView.draw(realPose, self.r)
         pyg.display.flip()
 
         self.tickComms()
