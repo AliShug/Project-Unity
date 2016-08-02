@@ -22,7 +22,9 @@ from util import *
 RECV_PORT = 14001
 TRAN_PORT = 14002
 
-MAX_SPEED = 25.0
+MAX_SPEED = 35.0
+ACCEL = 1.2
+DECEL = 1.6
 
 import pdb;
 
@@ -232,12 +234,12 @@ class Kinectics:
         delta = np.subtract(self.curGoal, self.ikTarget)
         dist = np.linalg.norm(delta)
         if (dist < 0.001):
-            self.lerpSpeed = 0
+            self.lerpSpeed = ACCEL*10
             return
         else:
             # acceleration
-            self.lerpSpeed += 0.5
-            curMax = MAX_SPEED*(0.03 + 0.97*min(1, 0.007*dist))
+            self.lerpSpeed += ACCEL
+            curMax = MAX_SPEED*(0.03 + 0.97*min(1, 0.01*DECEL*dist))
             if self.lerpSpeed > curMax:
                 self.lerpSpeed = curMax
             self.ikTarget = self.ikTarget + normalize(delta)*min(dist, self.lerpSpeed)
@@ -285,7 +287,6 @@ class Kinectics:
 
         # Lerp towards target
         self.lerpIKTarget()
-        printVec(self.ikTarget)
         # IK - calculate swing and elbow pos using goal pos
         timer = time.clock()
         self.arm.setWristGoalPosition(self.ikTarget)

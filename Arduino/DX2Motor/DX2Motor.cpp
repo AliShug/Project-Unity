@@ -905,7 +905,7 @@ int DX2Motor::setGoalSpeed(float goalspeed) {
     return err;
 }
 
-float DX2Motor::getGoalTorque(int &err) {
+float DX2Motor::getTorqueLimit(int &err) {
     unsigned char b[2];
     err = read(35, 2, b);
     if (err == DX2MOTOR_ERR_OK) {
@@ -918,9 +918,9 @@ float DX2Motor::getGoalTorque(int &err) {
     }
 }
 
-int DX2Motor::setGoalTorque(float goaltorque) {
+int DX2Motor::setTorqueLimit(float torquelimit) {
     unsigned char b[2];
-    int raw = convertFromPercentage(goaltorque);
+    int raw = convertFromPercentage(torquelimit);
     if (raw < 0) {
         raw = 0;
     }

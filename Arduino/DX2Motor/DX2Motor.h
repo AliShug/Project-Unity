@@ -125,8 +125,8 @@ public:
     int setGoalPosition(float goalposition);
     float getGoalSpeed(int &err);
     int setGoalSpeed(float goalspeed);
-    float getGoalTorque(int &err);
-    int setGoalTorque(float goaltorque);
+    float getTorqueLimit(int &err);
+    int setTorqueLimit(float torquelimit);
     float getPosition(int &err);
     float getSpeed(int &err);
     float getLoad(int &err);

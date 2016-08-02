@@ -24,6 +24,32 @@ bool Protocol::waitTimeout(Stream &s, long time) {
     return false;
 }
 
+{% macro finaliseSet(version) %}
+void dx{{version}}FinaliseSet(Stream &s, int err) {
+    if (err != DX{{version}}MOTOR_ERR_OK) {
+        s.print("ERROR ");
+        s.println(err);
+    }
+    else {
+        s.println("k");
+    }
+}
+{% endmacro %}
+
+{% macro finaliseGet(version) %}
+void dx{{version}}FinaliseGet(Stream &s, int err, const void* res) {
+    if (err != DX{{version}}MOTOR_ERR_OK) {
+        s.print("ERROR ");
+        s.println(err);
+    }
+    else {
+        s.print('k');
+        char *ptr = (char*)res;
+        s.write(ptr, 4);
+    }
+}
+{% endmacro %}
+
 {% macro dispatchFunction(version) %}
 void Protocol::dispatchV{{version}}Command(Stream &s, int mode, char command, char id) {
     int err;
@@ -31,24 +57,18 @@ void Protocol::dispatchV{{version}}Command(Stream &s, int mode, char command, ch
     if (mode == MODE_SET) {
         switch (command) {
             {% for c in commands if c.can_set and c[version] %}
-            case '{{c.short}}': {
+            case '{{"\\x{0:02X}".format(ord(c.short))}}': {
                 {% if c.type == 'float' %}
                 float val = _argf;
                 {% else %}
                 long val = _argi;
                 {% endif %}
                 err = _x{{version}}s[id].set{{c.name}}(val);
-                if (err != DX{{version}}MOTOR_ERR_OK) {
-                    s.print("ERROR ");
-                    s.println(err);
-                }
-                else {
-                    s.println("k");
-                }
+                dx{{version}}FinaliseSet(s, err);
             } break;
             {% endfor %}
             default:
-            s.println("ERROR: Bad command");
+                s.println("ERROR: Bad command");
             return;
         }
         s.flush();
@@ -56,30 +76,18 @@ void Protocol::dispatchV{{version}}Command(Stream &s, int mode, char command, ch
     else if (mode == MODE_GET) {
         switch (command) {
             {% for c in commands if c.can_get and c[version] %}
-            case '{{c.short}}': {
+            case '{{"\\x{0:02X}".format(ord(c.short))}}': {
                 {% if c.type == 'float' %}
                 float res;
                 {% else %}
                 long res;
                 {% endif %}
                 res = _x{{version}}s[id].get{{c.name}}(err);
-                if (err != DX{{version}}MOTOR_ERR_OK) {
-                    s.print("ERROR ");
-                    s.println(err);
-                }
-                else {
-                    s.print('k');
-                    char *ptr = (char*)&res;
-                    s.write(ptr[0]);
-                    s.write(ptr[1]);
-                    s.write(ptr[2]);
-                    s.write(ptr[3]);
-                    //s.write('\n');
-                }
+                dx{{version}}FinaliseGet(s, err, &res);
             } break;
             {% endfor %}
             default:
-            s.println("ERROR: Bad command");
+                s.println("ERROR: Bad command");
             return;
         }
         s.flush();
@@ -87,8 +95,16 @@ void Protocol::dispatchV{{version}}Command(Stream &s, int mode, char command, ch
 }
 {% endmacro %}
 
+// Utility functions
+{{finaliseSet(1)}}
+{{finaliseSet(2)}}
+{{finaliseGet(1)}}
+{{finaliseGet(2)}}
+
+// DX1 command processing
 {{dispatchFunction(1)}}
 
+// DX2 command processing
 {{dispatchFunction(2)}}
 
 void Protocol::handleIncoming(Stream &s) {
@@ -98,7 +114,13 @@ void Protocol::handleIncoming(Stream &s) {
     char buffer[64];
     int commandLen = s.read();
     for (int i = 0; i < commandLen; i++) {
+        while (!s.available()); // busy wait for each byte
         buffer[i] = s.read();
+    }
+
+    // Ignore noise
+    if (commandLen < 4) {
+        return;
     }
 
     // First character indicates get/set mode (or special commands)

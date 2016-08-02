@@ -288,7 +288,7 @@ attribs:
     max: 1023
     unit: Percentage
 
-  - name: GoalTorque
+  - name: TorqueLimit
     adr: 35
     access: RW
     input: torque

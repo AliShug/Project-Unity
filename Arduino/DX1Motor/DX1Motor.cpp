@@ -767,7 +767,7 @@ int DX1Motor::setCCWMargin(int ccwmargin) {
 
 int DX1Motor::getCWSlope(int &err) {
     unsigned char b[1];
-    err = read(26, 1, b);
+    err = read(28, 1, b);
     if (err == DX1MOTOR_ERR_OK) {
         int raw = b[0];
         return raw;
@@ -787,13 +787,13 @@ int DX1Motor::setCWSlope(int cwslope) {
         raw = 254;
     }
     b[0] = raw;
-    int err = write(26, 1, b);
+    int err = write(28, 1, b);
     return err;
 }
 
 int DX1Motor::getCCWSlope(int &err) {
     unsigned char b[1];
-    err = read(27, 1, b);
+    err = read(29, 1, b);
     if (err == DX1MOTOR_ERR_OK) {
         int raw = b[0];
         return raw;
@@ -813,7 +813,7 @@ int DX1Motor::setCCWSlope(int ccwslope) {
         raw = 254;
     }
     b[0] = raw;
-    int err = write(27, 1, b);
+    int err = write(29, 1, b);
     return err;
 }
 

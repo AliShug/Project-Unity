@@ -236,7 +236,7 @@ attribs:
     max: 254
 
   - name: CWSlope
-    adr: 26
+    adr: 28
     access: RW
     size: 1
     type: int
@@ -244,7 +244,7 @@ attribs:
     max: 254
 
   - name: CCWSlope
-    adr: 27
+    adr: 29
     access: RW
     size: 1
     type: int

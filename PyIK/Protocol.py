@@ -37,11 +37,11 @@ class Servo:
         raise Exception('Timeout')
 
     # Templated commands
-    def setGoalPosition(self, val):
-        command = 'sP{pver}{packedid}{arg}'.format(
+    def setID(self, val):
+        command = 's\x02{pver}{packedid}{arg}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
-            arg = struct.pack('f', val)
+            arg = struct.pack('i', val)
         )
         l = struct.pack('b', len(command))
         self.serial.write(l+command)
@@ -55,26 +55,8 @@ class Servo:
             print (res)
             return False
         return True
-    def setGoalSpeed(self, val):
-        command = 'sS{pver}{packedid}{arg}'.format(
-            pver = self.protocol,
-            packedid = struct.pack('B', self.id),
-            arg = struct.pack('f', val)
-        )
-        l = struct.pack('b', len(command))
-        self.serial.write(l+command)
-        self.waitFor(2)
-
-        # Response
-        res = 'ERROR: Nothing received'
-        while self.serial.in_waiting > 0:
-            res = self.serial.readline()
-        if res.startswith('ERROR'):
-            print (res)
-            return False
-        return True
-    def setLED(self, val):
-        command = 'se{pver}{packedid}{arg}'.format(
+    def setReturnDelay(self, val):
+        command = 's\x03{pver}{packedid}{arg}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
@@ -92,7 +74,97 @@ class Servo:
             return False
         return True
     def setMaxTorque(self, val):
-        command = 'sq{pver}{packedid}{arg}'.format(
+        command = 's\x04{pver}{packedid}{arg}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id),
+            arg = struct.pack('f', val)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(2)
+
+        # Response
+        res = 'ERROR: Nothing received'
+        while self.serial.in_waiting > 0:
+            res = self.serial.readline()
+        if res.startswith('ERROR'):
+            print (res)
+            return False
+        return True
+    def setTorqueEnable(self, val):
+        command = 's\x05{pver}{packedid}{arg}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id),
+            arg = struct.pack('i', val)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(2)
+
+        # Response
+        res = 'ERROR: Nothing received'
+        while self.serial.in_waiting > 0:
+            res = self.serial.readline()
+        if res.startswith('ERROR'):
+            print (res)
+            return False
+        return True
+    def setLED(self, val):
+        command = 's\x06{pver}{packedid}{arg}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id),
+            arg = struct.pack('i', val)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(2)
+
+        # Response
+        res = 'ERROR: Nothing received'
+        while self.serial.in_waiting > 0:
+            res = self.serial.readline()
+        if res.startswith('ERROR'):
+            print (res)
+            return False
+        return True
+    def setGoalPosition(self, val):
+        command = 's\x0C{pver}{packedid}{arg}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id),
+            arg = struct.pack('f', val)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(2)
+
+        # Response
+        res = 'ERROR: Nothing received'
+        while self.serial.in_waiting > 0:
+            res = self.serial.readline()
+        if res.startswith('ERROR'):
+            print (res)
+            return False
+        return True
+    def setGoalSpeed(self, val):
+        command = 's\x0D{pver}{packedid}{arg}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id),
+            arg = struct.pack('f', val)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(2)
+
+        # Response
+        res = 'ERROR: Nothing received'
+        while self.serial.in_waiting > 0:
+            res = self.serial.readline()
+        if res.startswith('ERROR'):
+            print (res)
+            return False
+        return True
+    def setTorqueLimit(self, val):
+        command = 's\x0E{pver}{packedid}{arg}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
             arg = struct.pack('f', val)
@@ -110,7 +182,7 @@ class Servo:
             return False
         return True
     def setCWMargin(self, val):
-        command = 's+{pver}{packedid}{arg}'.format(
+        command = 's\x0F{pver}{packedid}{arg}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
@@ -128,7 +200,7 @@ class Servo:
             return False
         return True
     def setCCWMargin(self, val):
-        command = 's_{pver}{packedid}{arg}'.format(
+        command = 's\x10{pver}{packedid}{arg}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
@@ -146,7 +218,7 @@ class Servo:
             return False
         return True
     def setCWSlope(self, val):
-        command = 's-{pver}{packedid}{arg}'.format(
+        command = 's\x11{pver}{packedid}{arg}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
@@ -164,7 +236,7 @@ class Servo:
             return False
         return True
     def setCCWSlope(self, val):
-        command = 's={pver}{packedid}{arg}'.format(
+        command = 's\x12{pver}{packedid}{arg}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
             arg = struct.pack('i', val)
@@ -181,71 +253,8 @@ class Servo:
             print (res)
             return False
         return True
-    def getVoltage(self):
-        command = 'gv{pver}{packedid}'.format(
-            pver = self.protocol,
-            packedid = struct.pack('B', self.id)
-        )
-        l = struct.pack('b', len(command))
-        self.serial.write(l+command)
-        self.waitFor(5)
-
-        # Retreive response
-        try:
-            arg = self.tryRead(1)
-            if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
-                return None
-            arg = self.tryRead(4)
-            val = struct.unpack('f', arg)[0]
-            return val
-        except Exception as e:
-            print ('ERR: Bad receive', e)
-            return None
-    def getPosition(self):
-        command = 'gp{pver}{packedid}'.format(
-            pver = self.protocol,
-            packedid = struct.pack('B', self.id)
-        )
-        l = struct.pack('b', len(command))
-        self.serial.write(l+command)
-        self.waitFor(5)
-
-        # Retreive response
-        try:
-            arg = self.tryRead(1)
-            if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
-                return None
-            arg = self.tryRead(4)
-            val = struct.unpack('f', arg)[0]
-            return val
-        except Exception as e:
-            print ('ERR: Bad receive', e)
-            return None
-    def getLoad(self):
-        command = 'gl{pver}{packedid}'.format(
-            pver = self.protocol,
-            packedid = struct.pack('B', self.id)
-        )
-        l = struct.pack('b', len(command))
-        self.serial.write(l+command)
-        self.waitFor(5)
-
-        # Retreive response
-        try:
-            arg = self.tryRead(1)
-            if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
-                return None
-            arg = self.tryRead(4)
-            val = struct.unpack('f', arg)[0]
-            return val
-        except Exception as e:
-            print ('ERR: Bad receive', e)
-            return None
-    def getTemperature(self):
-        command = 'gt{pver}{packedid}'.format(
+    def getModelNumber(self):
+        command = 'g\x00{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
@@ -265,8 +274,8 @@ class Servo:
         except Exception as e:
             print ('ERR: Bad receive', e)
             return None
-    def getSpeed(self):
-        command = 'gs{pver}{packedid}'.format(
+    def getFirmwareVersion(self):
+        command = 'g\x01{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
@@ -281,13 +290,13 @@ class Servo:
                 print ('ERR: ',arg+self.serial.readline())
                 return None
             arg = self.tryRead(4)
-            val = struct.unpack('f', arg)[0]
+            val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
             print ('ERR: Bad receive', e)
             return None
-    def getGoalPosition(self):
-        command = 'gP{pver}{packedid}'.format(
+    def getID(self):
+        command = 'g\x02{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
@@ -302,34 +311,13 @@ class Servo:
                 print ('ERR: ',arg+self.serial.readline())
                 return None
             arg = self.tryRead(4)
-            val = struct.unpack('f', arg)[0]
+            val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
             print ('ERR: Bad receive', e)
             return None
-    def getGoalSpeed(self):
-        command = 'gS{pver}{packedid}'.format(
-            pver = self.protocol,
-            packedid = struct.pack('B', self.id)
-        )
-        l = struct.pack('b', len(command))
-        self.serial.write(l+command)
-        self.waitFor(5)
-
-        # Retreive response
-        try:
-            arg = self.tryRead(1)
-            if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
-                return None
-            arg = self.tryRead(4)
-            val = struct.unpack('f', arg)[0]
-            return val
-        except Exception as e:
-            print ('ERR: Bad receive', e)
-            return None
-    def getLED(self):
-        command = 'ge{pver}{packedid}'.format(
+    def getReturnDelay(self):
+        command = 'g\x03{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
@@ -350,7 +338,217 @@ class Servo:
             print ('ERR: Bad receive', e)
             return None
     def getMaxTorque(self):
-        command = 'gq{pver}{packedid}'.format(
+        command = 'g\x04{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('f', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getTorqueEnable(self):
+        command = 'g\x05{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('i', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getLED(self):
+        command = 'g\x06{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('i', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getVoltage(self):
+        command = 'g\x07{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('f', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getPosition(self):
+        command = 'g\x08{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('f', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getLoad(self):
+        command = 'g\x09{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('f', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getTemperature(self):
+        command = 'g\x0A{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('i', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getSpeed(self):
+        command = 'g\x0B{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('f', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getGoalPosition(self):
+        command = 'g\x0C{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('f', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getGoalSpeed(self):
+        command = 'g\x0D{pver}{packedid}'.format(
+            pver = self.protocol,
+            packedid = struct.pack('B', self.id)
+        )
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        self.waitFor(5)
+
+        # Retreive response
+        try:
+            arg = self.tryRead(1)
+            if arg != 'k':
+                print ('ERR: ',arg+self.serial.readline())
+                return None
+            arg = self.tryRead(4)
+            val = struct.unpack('f', arg)[0]
+            return val
+        except Exception as e:
+            print ('ERR: Bad receive', e)
+            return None
+    def getTorqueLimit(self):
+        command = 'g\x0E{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
@@ -371,7 +569,7 @@ class Servo:
             print ('ERR: Bad receive', e)
             return None
     def getCWMargin(self):
-        command = 'g+{pver}{packedid}'.format(
+        command = 'g\x0F{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
@@ -392,7 +590,7 @@ class Servo:
             print ('ERR: Bad receive', e)
             return None
     def getCCWMargin(self):
-        command = 'g_{pver}{packedid}'.format(
+        command = 'g\x10{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
@@ -413,7 +611,7 @@ class Servo:
             print ('ERR: Bad receive', e)
             return None
     def getCWSlope(self):
-        command = 'g-{pver}{packedid}'.format(
+        command = 'g\x11{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )
@@ -434,7 +632,7 @@ class Servo:
             print ('ERR: Bad receive', e)
             return None
     def getCCWSlope(self):
-        command = 'g={pver}{packedid}'.format(
+        command = 'g\x12{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )

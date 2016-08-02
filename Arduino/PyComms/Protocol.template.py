@@ -39,7 +39,7 @@ class Servo:
     # Templated commands
 {% for c in commands if c.can_set %}
     def set{{c.name}}(self, val):
-        command = 's{{c.short}}{pver}{packedid}{arg}'.format(
+        command = 's{{"\\x{0:02X}".format(ord(c.short))}}{pver}{packedid}{arg}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
             {% if c.type == 'int' %}
@@ -63,7 +63,7 @@ class Servo:
 {% endfor %}
 {% for c in commands if c.can_get %}
     def get{{c.name}}(self):
-        command = 'g{{c.short}}{pver}{packedid}'.format(
+        command = 'g{{"\\x{0:02X}".format(ord(c.short))}}{pver}{packedid}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id)
         )

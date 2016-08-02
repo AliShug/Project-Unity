@@ -1,4 +1,9 @@
-import os, errno, sys, yaml
+import os
+import errno
+import sys
+import struct
+
+import yaml
 from jinja2 import Environment, PackageLoader
 
 def allUnique(x):
@@ -8,6 +13,7 @@ def allUnique(x):
 env = Environment(loader=PackageLoader('protocolgen', ''),
     trim_blocks=True,
     lstrip_blocks=True)
+env.globals['ord'] = ord
 code_template = env.get_template('protocol.template.cpp')
 py_template = env.get_template('Protocol.template.py')
 
@@ -15,11 +21,16 @@ input_stream = file('PyComms\protocol.yaml')
 data = yaml.load(input_stream)
 data['classname'] = 'Protocol'
 
-# check the short identifiers are unique
-shorts = [x["short"] for x in data["commands"]]
-if not allUnique(shorts):
-    print("Non-unique short identifier")
-    sys.exit(1)
+id_file = open('idmapping.txt', 'w')
+
+# short identifiers must be unique
+int_identifier = 0
+for x in data["commands"]:
+    x["short"] = struct.pack('b', int_identifier)
+    id_file.write('{0} : 0x{1:02X}\n'.format(x['name'], int_identifier))
+    int_identifier += 1
+
+id_file.close()
 
 # Render templates
 code = code_template.render(**data)
