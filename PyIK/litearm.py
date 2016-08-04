@@ -6,9 +6,9 @@ import struct
 import solvers
 from util import *
 
-MOTORSPEED = 0.8
+MOTORSPEED = 0.9
 MOTORMARGIN = 1
-MOTORSLOPE = 80
+MOTORSLOPE = 32
 
 class ArmConfig:
     """Holds an arm's proportions, limits and other configuration data"""

@@ -195,6 +195,13 @@ public class RecordingManager : MonoBehaviour {
                 _playbackMapping.Add(player.uniqueID, player);
             }
         }
+        else if (mode == Mode.Off) {
+            // Deactivate playback objects
+            _playbackObjects = transform.root.GetComponentsInChildren<CustomPlayback>(true);
+            foreach (CustomPlayback player in _playbackObjects) {
+                player.gameObject.SetActive(false);
+            }
+        }
 	}
 	
 	// Poll recorder objects at regular intervals

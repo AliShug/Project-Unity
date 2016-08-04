@@ -13,6 +13,7 @@ public class PhysicsInputManager : MonoBehaviour {
 	public RigidHand[] hands;
 
 	public float hoverDistance = 0.1f;
+    public Vector2 effectorDim;
 
 	private InteractiveObject _lastHovered;
 	
@@ -24,6 +25,7 @@ public class PhysicsInputManager : MonoBehaviour {
 		float closestDist = hoverDistance;
 		Vector3 closestPoint = new Vector3();
 		Vector3 closestNormal = new Vector3();
+        Vector3 interactionPoint = new Vector3();
 		Transform closestBone = null;
 		InteractiveObject targetInput = null;
 
@@ -33,18 +35,13 @@ public class PhysicsInputManager : MonoBehaviour {
 				if (hand.isActiveAndEnabled) {
 					foreach (RigidFinger finger in hand.fingers) {
 						Transform bone = finger.bones[3];
-						// Find closest point on mesh (in local space)
-						Vector3 localPos = input.transform.InverseTransformPoint(bone.position);
-						Vector3 normal;
-						Vector3 localPoint = input.GetComponent<MeshFilter>().mesh.NearestPoint(localPos, out normal);
-						Vector3 point = input.transform.TransformPoint(localPoint);
-
+						Vector3 point = input.GetNearestPoint(bone.position);
 						float dist = Vector3.Distance(point, bone.position);
 
 						if (dist < closestDist) {
 							closestBone = bone;
 							closestPoint = point;
-							closestNormal = normal;
+							closestNormal = input.transform.forward;
 							closestDist = dist;
 							targetInput = input;
 						}
@@ -65,10 +62,12 @@ public class PhysicsInputManager : MonoBehaviour {
 				_lastHovered = targetInput;
 			}
 
+            // Get the actual interaction point
+            interactionPoint = targetInput.GetInteractionPoint(closestPoint, effectorDim);
 			if (displayTargetWidget && !holdTarget) {
 				displayTargetWidget.gameObject.SetActive(true);
-				displayTargetWidget.position = closestPoint;
-				Vector3 normalTarget = closestPoint + targetInput.transform.TransformDirection(closestNormal);
+				displayTargetWidget.position = interactionPoint;
+				Vector3 normalTarget = interactionPoint + closestNormal;
 				displayTargetWidget.LookAt(normalTarget);
 			}
 			if (displayBoneWidget) {

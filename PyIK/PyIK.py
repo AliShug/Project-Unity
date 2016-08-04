@@ -24,7 +24,7 @@ TRAN_PORT = 14002
 
 MAX_SPEED = 35.0
 ACCEL = 1.2
-DECEL = 1.6
+DECEL = 0.8
 
 import pdb;
 
@@ -217,7 +217,6 @@ class Kinectics:
                 self.goalNormal = np.array(data[4:])
                 #print(data)
                 newGoal = goalPos*1000
-                printVec(self.goalNormal)
                 self.curGoal = np.array(newGoal)
 
 
