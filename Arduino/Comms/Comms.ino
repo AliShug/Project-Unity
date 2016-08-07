@@ -4,6 +4,8 @@
  Author:	alist
 */
 
+#include <CapacitiveSensor.h>
+
 #include "Protocol.h"
 #include <DX1Motor.h>
 #include <DX2Motor.h>
@@ -78,6 +80,8 @@ void setup() {
     digitalWrite(13, LOW);
     delay(500);
     digitalWrite(13, HIGH);
+
+    CapacitiveSensor capSense(30, 31);
 
     Serial.println("CommTest READY");
 

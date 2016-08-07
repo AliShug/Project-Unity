@@ -5,12 +5,10 @@
 
 #include "Protocol.h"
 
-Protocol::Protocol(DX1Motor *x1s, int nx1, DX2Motor *x2s, int nx2) {
-    _x1s = x1s;
-    _x2s = x2s;
-    _nx1 = nx1;
-    _nx2 = nx2;
-}
+Protocol::Protocol(DX1Motor *x1s, int nx1, DX2Motor *x2s, int nx2)
+:   _capSense(30,31),
+    _x1s(x1s), _x2s(x2s),
+    _nx1(nx1), _nx2(nx2) {}
 
 bool Protocol::waitTimeout(Stream &s, long time) {
     unsigned long start = millis();
@@ -401,7 +399,7 @@ void Protocol::handleIncoming(Stream &s) {
     }
 
     // Ignore noise
-    if (commandLen < 4) {
+    if (commandLen < 2) {
         return;
     }
 
@@ -440,6 +438,13 @@ void Protocol::handleIncoming(Stream &s) {
             else {
                 s.println(i);
             }
+        }
+        return;
+    case 'c':
+        // Capacitive sensing
+        for (int i = 0; i < buffer[1]; i++) {
+            long sensor = _capSense.capacitiveSensor(20);
+            s.write((char*)&sensor, sizeof(sensor));
         }
         return;
     default:

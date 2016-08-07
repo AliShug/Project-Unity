@@ -7,6 +7,45 @@ import time
 
 waitTime = 0.01
 
+class TimeoutException(Exception):
+    pass
+
+def waitFor(serial, num_bytes, timeout=0.1):
+    start = time.time()
+
+    # Busy wait until required bytes arrive or we timeout
+    while time.time() < start + timeout:
+        if serial.in_waiting >= num_bytes:
+            return
+
+    raise TimeoutException('Timeout')
+
+def tryRead(serial, num_bytes, timeout=0.05):
+    start = time.time()
+    read_bytes = 0
+
+    # Busy wait until required bytes arrive or we timeout
+    while time.time() < start + timeout:
+        if serial.in_waiting >= num_bytes:
+            return serial.read(num_bytes)
+
+    raise TimeoutException('Timeout')
+
+
+class CapacitiveSensor:
+    def __init__(self, serial):
+        self.serial = serial
+
+    def read(self, count):
+        command = 'c{0}'.format(chr(count))
+        l = struct.pack('b', len(command))
+        self.serial.write(l+command)
+        waitFor(self.serial, count*4)
+
+        values = [0]*count
+        for i in xrange(count):
+            values[i] = struct.unpack('i', self.serial.read(4))[0]
+        return values
 
 class Servo:
     def __init__(self, serial, protocol_ver, id):
@@ -14,27 +53,6 @@ class Servo:
         self.id = id
         self.serial = serial
         self.data = {'pos': 150}
-
-    def waitFor(self, num_bytes, timeout=0.1):
-        start = time.time()
-
-        # Busy wait until required bytes arrive or we timeout
-        while time.time() < start + timeout:
-            if self.serial.in_waiting >= num_bytes:
-                return
-
-        raise Exception('Timeout')
-
-    def tryRead(self, num_bytes, timeout=0.05):
-        start = time.time()
-        read_bytes = 0
-
-        # Busy wait until required bytes arrive or we timeout
-        while time.time() < start + timeout:
-            if self.serial.in_waiting >= num_bytes:
-                return self.serial.read(num_bytes)
-
-        raise Exception('Timeout')
 
     # Templated commands
 {% for c in commands if c.can_set %}
@@ -50,7 +68,7 @@ class Servo:
         )
         l = struct.pack('b', len(command))
         self.serial.write(l+command)
-        self.waitFor(2)
+        waitFor(self.serial, 2)
 
         # Response
         res = 'ERROR: Nothing received'
@@ -69,15 +87,15 @@ class Servo:
         )
         l = struct.pack('b', len(command))
         self.serial.write(l+command)
-        self.waitFor(5)
+        waitFor(self.serial, 5)
 
         # Retreive response
         try:
-            arg = self.tryRead(1)
+            arg = tryRead(self.serial, 1)
             if arg != 'k':
                 print ('ERR: ',arg+self.serial.readline())
                 return None
-            arg = self.tryRead(4)
+            arg = tryRead(self.serial, 4)
             {% if c.type == 'int' %}
             val = struct.unpack('i', arg)[0]
             {% else %}

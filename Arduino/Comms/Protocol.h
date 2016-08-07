@@ -11,6 +11,7 @@
 
 #include <DX1Motor.h>
 #include <DX2Motor.h>
+#include <CapacitiveSensor.h>
 
 class Protocol {
 private:
@@ -25,6 +26,7 @@ private:
 
     DX1Motor *_x1s;
     DX2Motor *_x2s;
+    CapacitiveSensor _capSense;
     int _nx1, _nx2;
 
     const static int MODE_GET = 0, MODE_SET = 1;

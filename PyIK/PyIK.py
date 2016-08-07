@@ -11,7 +11,7 @@ import numpy as np
 import pygame as pyg
 
 from pid import PIDControl
-from Protocol import Servo
+from Protocol import Servo, CapacitiveSensor
 from solvers import IKSolver, PhysicalSolver
 import window
 import views
@@ -165,18 +165,27 @@ class Kinectics:
             # use the default config
             arm_config = litearm.ArmConfig())
 
+        # Capacitive sensor
+        self.capSense = CapacitiveSensor(comm)
+
         self.sideView = views.PlaneView(width=10)
         self.realSideView = views.PlaneView(width=5, color=gray)
         self.topView = views.TopView(width=12)
         self.realTopView = views.TopView(width=6, color=gray)
 
         self.armAngle = 0
-        self.pid = PIDControl(5, 0, 0)
+        self.pid = PIDControl(0.2, 0, 0)
 
-        self.curGoal = np.array([0.0, 50.0, 200.0])
-        self.ikTarget = np.array([0.0, 50.0, 200.0])
+        self.arm.pollServos()
+        realPose = self.arm.getRealPose()
+        if realPose is not None:
+            self.curGoal = self.arm.getRealPose().effector
+        else:
+            self.curGoal = np.array([0., 50., 200.])
+        self.ikTarget = np.array(self.curGoal)
         self.curDir = [0.0, 0.0]
         self.goalNormal = [0, 0, 1]
+        self.ikOffset = np.array([0.,0.,0.])
 
         self.lerpSpeed = 0
 
@@ -218,15 +227,14 @@ class Kinectics:
                 #print(data)
                 newGoal = goalPos*1000
                 self.curGoal = np.array(newGoal)
-
-
             except socket.error as err:
                 print ("Socket error: {0}".format(err))
+        sensor = struct.pack('i', self.capSense.read(1)[0])
         realPose = self.arm.getRealPose()
         if realPose is not None:
-            self.sockOut.send(realPose.serialize())
+            self.sockOut.send(realPose.serialize() + sensor)
         else:
-            self.sockOut.send(self.arm.getIKPose().serialize())
+            self.sockOut.send(self.arm.getIKPose().serialize() + sensor)
 
     def lerpIKTarget(self):
         #pdb.set_trace()
@@ -242,6 +250,11 @@ class Kinectics:
             if self.lerpSpeed > curMax:
                 self.lerpSpeed = curMax
             self.ikTarget = self.ikTarget + normalize(delta)*min(dist, self.lerpSpeed)
+
+    def getGoalOffset(self):
+        """3D Offset between measured position and goal position"""
+        pose = self.arm.getRealPose()
+        return np.subtract(self.ikTarget, pose.effector)
 
     def tick(self):
         if self.stopped:
@@ -286,6 +299,9 @@ class Kinectics:
 
         # Lerp towards target
         self.lerpIKTarget()
+        # Find offset of real position from goal position
+        if (self.arm.getRealPose() is not None):
+            self.ikOffset = self.ikOffset*0.9 + self.getGoalOffset()*0.1
         # IK - calculate swing and elbow pos using goal pos
         timer = time.clock()
         self.arm.setWristGoalPosition(self.ikTarget)
@@ -335,6 +351,7 @@ class Kinectics:
         pyg.display.flip()
 
         self.tickComms()
+        #print(self.capSense.read(1))
 
     def displayServoPositions(self, col, pos):
         i = 0

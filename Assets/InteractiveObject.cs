@@ -70,4 +70,17 @@ public class InteractiveObject : MonoBehaviour {
         localPoi.y = Mathf.Clamp(localPoi.y, yoff-surfaceExtents.y, surfaceExtents.y-yoff);
         return transform.TransformPoint(localPoi);
     }
+
+    public Vector3 InteractionCenter {
+        get {
+            Vector3 localCenter = new Vector3(0, 0, surfaceOffset);
+            return transform.TransformPoint(localCenter);
+        }
+    }
+
+    public Vector3 InteractionNormal {
+        get {
+            return transform.forward;
+        }
+    }
 }

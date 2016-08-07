@@ -20,6 +20,13 @@ public class SocketTest : MonoBehaviour {
 	public Transform wristYawTransform;
 	public Transform wristPitchTransform;
 
+    private int _capacitiveSensor;
+    public int CapacitiveSensor {
+        get {
+            return _capacitiveSensor;
+        }
+    }
+
 	private Socket sockIn;
 	private Socket sockOut;
 
@@ -63,16 +70,16 @@ public class SocketTest : MonoBehaviour {
         send_raw[2] = 0;
         send_raw[3] = 0;
         // goal pos
-        System.BitConverter.GetBytes(pos.x).CopyTo(send_raw, 4);
-		System.BitConverter.GetBytes(pos.y - 0.0296f).CopyTo(send_raw, 4 + 1*sizeof(float));
-		System.BitConverter.GetBytes(pos.z).CopyTo(send_raw, 4 + 2*sizeof(float));
+        BitConverter.GetBytes(pos.x).CopyTo(send_raw, 4);
+        BitConverter.GetBytes(pos.y - 0.0296f).CopyTo(send_raw, 4 + 1*sizeof(float));
+        BitConverter.GetBytes(pos.z).CopyTo(send_raw, 4 + 2*sizeof(float));
         // goal orient
-        System.BitConverter.GetBytes(norm.x).CopyTo(send_raw, 4 + 3*sizeof(float));
-        System.BitConverter.GetBytes(norm.y).CopyTo(send_raw, 4 + 4*sizeof(float));
-        System.BitConverter.GetBytes(norm.z).CopyTo(send_raw, 4 + 5*sizeof(float));
+        BitConverter.GetBytes(norm.x).CopyTo(send_raw, 4 + 3*sizeof(float));
+        BitConverter.GetBytes(norm.y).CopyTo(send_raw, 4 + 4*sizeof(float));
+        BitConverter.GetBytes(norm.z).CopyTo(send_raw, 4 + 5*sizeof(float));
 		sockOut.Send(send_raw);
 
-		// Receive stuff
+        // Receive stuff
 		int nbytes = sockIn.Available;
 		// Exhaustively empty the socket's buffer
 		byte[] rawData = new byte[4096];
@@ -80,11 +87,12 @@ public class SocketTest : MonoBehaviour {
 			sockIn.Receive(rawData);
 
 			// Extract packed floating-point data from the raw bytes
-			shoulderAngle = System.BitConverter.ToSingle(rawData, 0) * Mathf.Rad2Deg;
-			mainArmAngle = System.BitConverter.ToSingle(rawData, 4) * Mathf.Rad2Deg;
-			forearmAngle = System.BitConverter.ToSingle(rawData, 8) * Mathf.Rad2Deg;
-            wristX = System.BitConverter.ToSingle(rawData, 12) * Mathf.Rad2Deg;
-            wristY = System.BitConverter.ToSingle(rawData, 16) * Mathf.Rad2Deg;
+			shoulderAngle = BitConverter.ToSingle(rawData, 0) * Mathf.Rad2Deg;
+			mainArmAngle = BitConverter.ToSingle(rawData, 4) * Mathf.Rad2Deg;
+			forearmAngle = BitConverter.ToSingle(rawData, 8) * Mathf.Rad2Deg;
+            wristX = BitConverter.ToSingle(rawData, 12) * Mathf.Rad2Deg;
+            wristY = BitConverter.ToSingle(rawData, 16) * Mathf.Rad2Deg;
+            _capacitiveSensor = BitConverter.ToInt32(rawData, 20);
 		}
 
 		// Set the arm configuration

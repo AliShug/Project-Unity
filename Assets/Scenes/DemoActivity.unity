@@ -1660,6 +1660,8 @@ MonoBehaviour:
   - {fileID: 1167543056}
   hoverDistance: 0.15
   effectorDim: {x: 0.08, y: 0.08}
+  comms: {fileID: 544861567}
+  sensorThreshold: 500
 --- !u!1 &290171082
 GameObject:
   m_ObjectHideFlags: 0
@@ -2453,6 +2455,12 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9fc87b8357e617745b6de95103a93d4b, type: 2}
   m_IsPrefabParent: 0
+--- !u!114 &544861567 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 11486270, guid: 4de65fd6ffba479469af01e732f31552,
+    type: 2}
+  m_PrefabInternal: {fileID: 840972150}
+  m_Script: {fileID: 11500000, guid: 4c01dd12862879249becbd12579b4f11, type: 3}
 --- !u!1 &546647169
 GameObject:
   m_ObjectHideFlags: 0
@@ -3594,7 +3602,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 470624, guid: 4de65fd6ffba479469af01e732f31552, type: 2}
       propertyPath: m_LocalPosition.y
-      value: -0.41
+      value: -0.415
       objectReference: {fileID: 0}
     - target: {fileID: 470624, guid: 4de65fd6ffba479469af01e732f31552, type: 2}
       propertyPath: m_LocalPosition.z

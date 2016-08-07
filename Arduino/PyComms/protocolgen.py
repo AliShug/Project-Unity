@@ -6,10 +6,6 @@ import struct
 import yaml
 from jinja2 import Environment, PackageLoader
 
-def allUnique(x):
-    seen = set()
-    return not any(i in seen or seen.add(i) for i in x)
-
 env = Environment(loader=PackageLoader('protocolgen', ''),
     trim_blocks=True,
     lstrip_blocks=True)
@@ -40,6 +36,7 @@ py_code = py_template.render(**data)
 file('Comms/{0}.cpp'.format('Protocol'), 'w').write(code)
 # file('{c}/{c}.h'.format(c=cname), 'w').write(header)
 file('PyComms/{0}.py'.format('Protocol'), 'w').write(py_code)
+file('../PyIK/{0}.py'.format('Protocol'), 'w').write(py_code)
 
 # profilePath = os.environ.get('USERPROFILE')
 # if profilePath != None:

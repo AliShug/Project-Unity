@@ -4,6 +4,7 @@ import numpy as np
 import struct
 
 import solvers
+import pid
 from util import *
 
 MOTORSPEED = 0.9
@@ -198,6 +199,10 @@ class ArmController:
             if servo is None:
                 print ("Warning: {0} servo not connected".format(key))
             else:
+                # Initialise a PID controller for the servo
+                if servo.protocol == 1:
+                    servo.data['pid'] = pid.PIDControl(2.4, 0, 0.4)
+                servo.data['error'] = 0.0
                 # Make sure the goal speed is set
                 servo.setGoalSpeed(-MOTORSPEED)
                 servo.setTorqueEnable(1)
@@ -318,12 +323,29 @@ class ArmController:
     def tick(self):
         if self.target_pose is not None and self.motion_enable:
             # Drive servos
+            gain = 0.1
             if self.servos['swing'] is not None:
-                self.servos['swing'].setGoalPosition(self.target_pose.getServoSwing())
+                s = self.servos['swing']
+                pos = s.data['pos']
+                target = self.target_pose.getServoSwing()
+                # err = min(10, pos-target)
+                # s.data['error'] += err*gain
+                s.setGoalPosition(target)
             if self.servos['shoulder'] is not None:
-                self.servos['shoulder'].setGoalPosition(self.target_pose.getServoElevator())
+                s = self.servos['shoulder']
+                # cumulative error
+                pos = s.data['pos']
+                target = self.target_pose.getServoElevator()
+                err = min(10, pos-target)
+                s.data['error'] += err*gain
+                s.setGoalPosition(target - s.data['error'])
             if self.servos['elbow'] is not None:
-                self.servos['elbow'].setGoalPosition(self.target_pose.getServoActuator())
+                s = self.servos['elbow']
+                pos = s.data['pos']
+                target = self.target_pose.getServoActuator()
+                err = min(10, pos-target)
+                s.data['error'] += err*gain
+                s.setGoalPosition(target - s.data['error'])
 
             if self.servos['wrist_x'] is not None:
                 self.servos['wrist_x'].setGoalPosition(self.target_pose.getServoWristX())
