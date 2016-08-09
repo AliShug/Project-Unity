@@ -12,13 +12,12 @@ public class PhysicsButton : PhysicsInput {
 	private Material materialOriginal;
 	private Material materialUnique;
 
-	private Renderer myRenderer;
+	public Renderer myRenderer;
 	private Light myLight = null;
 
 	protected override void OnStart() {
         base.OnStart();
 
-		myRenderer = GetComponent<Renderer>();
 		myLight = GetComponent<Light>();
 
 		materialOriginal = myRenderer.material;
@@ -34,11 +33,13 @@ public class PhysicsButton : PhysicsInput {
 	 * Update the button's emissive highlight
 	 */
 	void ColorUpdate() {
-		// Modify our unique material's emissive properties
-		materialUnique.SetColor("_EmissionColor", currentColor);
-		if (myLight) {
-			myLight.color = currentColor;
-		}
+        // Modify our unique material's emissive properties
+        if (materialUnique) {
+            materialUnique.SetColor("_EmissionColor", currentColor);
+            if (myLight) {
+                myLight.color = currentColor;
+            }
+        }
 	}
 
 	/**
@@ -73,4 +74,10 @@ public class PhysicsButton : PhysicsInput {
 		currentColor = baseColor;
 		ColorUpdate();
 	}
+
+    protected override void OnPhysicsReset() {
+        base.OnPhysicsReset();
+        currentColor = baseColor;
+        ColorUpdate();
+    }
 }

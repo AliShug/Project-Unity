@@ -8,6 +8,13 @@ using System.Net.Sockets;
 
 public class SocketTest : MonoBehaviour {
 
+    private static SocketTest _instance;
+    public static SocketTest Instance {
+        get {
+            return _instance;
+        }
+    }
+
 	public int targetPort = 14001;
 	public int bindPort = 14002;
 
@@ -32,6 +39,10 @@ public class SocketTest : MonoBehaviour {
 
 	private int _frame = 0;
 	private float shoulderAngle, mainArmAngle, forearmAngle, wristX, wristY;
+
+    public SocketTest() {
+        _instance = this;
+    }
 
 	// Use this for initialization
 	void Start() {
@@ -80,7 +91,7 @@ public class SocketTest : MonoBehaviour {
 		sockOut.Send(send_raw);
 
         // Receive stuff
-		int nbytes = sockIn.Available;
+		//int nbytes = sockIn.Available;
 		// Exhaustively empty the socket's buffer
 		byte[] rawData = new byte[4096];
 		while (sockIn.Available > 0) {

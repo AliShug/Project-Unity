@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(Recorder))]
 public class InteractiveObject : MonoBehaviour {
+
+    public Transform inputTransform;
 
     public Vector2 surfaceExtents = new Vector2(0.5f, 0.5f);
     public float surfaceOffset = 0.5f;
@@ -11,8 +14,17 @@ public class InteractiveObject : MonoBehaviour {
         get { return _hovering; }
     }
 
+    public virtual bool Touchable {
+        get {
+            return true;
+        }
+    }
+
     // Use this for initialization
-    void Start () {
+    void Awake () {
+        if (inputTransform == null) {
+            inputTransform = transform;
+        }
         // Call derived class stuff
         OnStart();
 	}
@@ -21,6 +33,11 @@ public class InteractiveObject : MonoBehaviour {
 	void Update () {
         // Call derived class stuff
         OnUpdate();
+    }
+
+    public void PhysicsReset() {
+        _hovering = false;
+        OnPhysicsReset();
     }
 
     protected virtual void OnStart() { return; }
@@ -36,6 +53,8 @@ public class InteractiveObject : MonoBehaviour {
     protected virtual void OnHoverEnter() { return; }
     protected virtual void OnHoverExit() { return; }
 
+    protected virtual void OnPhysicsReset() { return; }
+
     public void HoverEnter() {
         if (!_hovering) {
             _hovering = true;
@@ -49,38 +68,38 @@ public class InteractiveObject : MonoBehaviour {
     }
 
     public Vector3 GetNearestPoint(Vector3 poi) {
-        Vector3 localPoi = transform.InverseTransformPoint(poi);
+        Vector3 localPoi = inputTransform.InverseTransformPoint(poi);
         // flatten on z axis
         localPoi.z = surfaceOffset;
         // clamp on x/y
         localPoi.x = Mathf.Clamp(localPoi.x, -surfaceExtents.x, surfaceExtents.x);
         localPoi.y = Mathf.Clamp(localPoi.y, -surfaceExtents.y, surfaceExtents.y);
-        return transform.TransformPoint(localPoi);
+        return inputTransform.TransformPoint(localPoi);
     }
 
     public Vector3 GetInteractionPoint(Vector3 poi, Vector2 effectorDim) {
-        Vector3 localPoi = transform.InverseTransformPoint(poi);
+        Vector3 localPoi = inputTransform.InverseTransformPoint(poi);
         // flatten on z axis
         localPoi.z = surfaceOffset;
         // clamp on x/y, including effector's dimensions
         // effector's dimensions must be corrected for local space
-        float xoff = (effectorDim.x / transform.localScale.x) / 2;
-        float yoff = (effectorDim.y / transform.localScale.y) / 2;
+        float xoff = (effectorDim.x / inputTransform.localScale.x) / 2;
+        float yoff = (effectorDim.y / inputTransform.localScale.y) / 2;
         localPoi.x = Mathf.Clamp(localPoi.x, xoff-surfaceExtents.x, surfaceExtents.x-xoff);
         localPoi.y = Mathf.Clamp(localPoi.y, yoff-surfaceExtents.y, surfaceExtents.y-yoff);
-        return transform.TransformPoint(localPoi);
+        return inputTransform.TransformPoint(localPoi);
     }
 
     public Vector3 InteractionCenter {
         get {
             Vector3 localCenter = new Vector3(0, 0, surfaceOffset);
-            return transform.TransformPoint(localCenter);
+            return inputTransform.TransformPoint(localCenter);
         }
     }
 
     public Vector3 InteractionNormal {
         get {
-            return transform.forward;
+            return inputTransform.forward;
         }
     }
 }

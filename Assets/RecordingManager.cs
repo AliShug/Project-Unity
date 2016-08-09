@@ -7,6 +7,13 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 public class RecordingManager : MonoBehaviour {
 
+    static RecordingManager _instance;
+    public static RecordingManager Instance {
+        get {
+            return _instance;
+        }
+    }
+
     [Serializable]
     internal struct _Vec3 {
         public float x, y, z;
@@ -97,6 +104,7 @@ public class RecordingManager : MonoBehaviour {
     internal class RecFrame {
         public float time;
         public List<RecState> states = new List<RecState>();
+        public List<string> messages = new List<string>();
     }
 
     [Serializable]
@@ -129,6 +137,13 @@ public class RecordingManager : MonoBehaviour {
     private int _ticCount;
     private int _playbackFrame = 0;
     private bool _stopped = false;
+
+    private Queue<string> _messages = new Queue<string>(32);
+
+    // Set the static instance variable
+    public RecordingManager() {
+        _instance = this;
+    }
 
 	// Use this for initialization
 	void Start () {
@@ -219,6 +234,10 @@ public class RecordingManager : MonoBehaviour {
                     RecState objectState = new RecState(rec);
                     frame.states.Add(objectState);
                 }
+                // Arbitrary strings can be logged by other systems
+                while (_messages.Count > 0) {
+                    frame.messages.Add(_messages.Dequeue());
+                }
 
                 _recording.frames.Add(frame);
             }
@@ -241,6 +260,10 @@ public class RecordingManager : MonoBehaviour {
                         else if (_objectMapping.TryGetValue(state.obj_id, out obj)) {
                             state.Unpack(obj);
                         }
+                    }
+                    // Playback messages
+                    foreach (string message in frame.messages) {
+                        Debug.LogFormat("RECORDING> {0}", message);
                     }
                 }
             }
@@ -269,5 +292,12 @@ public class RecordingManager : MonoBehaviour {
 
     public static string GetTimestamp(DateTime value) {
         return value.ToString("yyyyMMddHHmmssfff");
+    }
+
+    // Enable logging of arbitrary information
+    public void Log(string str) {
+        if (mode == Mode.Record) {
+            _messages.Enqueue(str);
+        }
     }
 }

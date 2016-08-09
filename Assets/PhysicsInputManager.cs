@@ -6,25 +6,80 @@ using MeshExtensions; // custom extension methods
 
 public class PhysicsInputManager : MonoBehaviour {
 
+    public enum Handedness {
+        Both,
+        Left, Right
+    }
+
+    public PhysicsMenu defaultMenu;
+
     public bool holdTarget = false;
 
 	public Transform displayTargetWidget;
 	public Transform displayBoneWidget;
+
+    public LeapHandController handController;
+
+    [SerializeField]
+    private Handedness _handChoice = Handedness.Both;
+    public Handedness HandChoice {
+        get {
+            return _handChoice;
+        }
+        set {
+            if (value == Handedness.Left) {
+                handController.enableLeft = true;
+                handController.enableRight = false;
+            }
+            else if (value == Handedness.Right) {
+                handController.enableLeft = false;
+                handController.enableRight = true;
+            }
+            else if (value == Handedness.Both) {
+                handController.enableLeft = handController.enableRight = true;
+            }
+        }
+    }
+
 	public RigidHand[] hands;
 
 	public float hoverDistance = 0.1f;
     public Vector2 effectorDim;
 
     public SocketTest comms;
+    public int sensorThreshold = 500;
+
 
 	private InteractiveObject _lastHovered;
-
-    public int sensorThreshold = 500;
 
     private bool _sensor = false;
     public bool Sensor {
         get {
             return _sensor;
+        }
+    }
+
+    // For UnityEvent connections
+    public void SetLeftHand() {
+        HandChoice = Handedness.Left;
+        RecordingManager.Instance.Log("SELECT: hand_choice=left");
+    }
+    public void SetRightHand() {
+        HandChoice = Handedness.Right;
+        RecordingManager.Instance.Log("SELECT: hand_choice=right");
+    }
+
+    void Start() {
+        // Hide all but the default menu
+        // active any disabled menus (disabled for practical reasons in-editor)
+        if (defaultMenu != null) {
+            var menus = GetComponentsInChildren<PhysicsMenu>(true);
+            foreach (var menu in menus) {
+                menu.gameObject.SetActive(true);
+                menu.Hide();
+            }
+
+            defaultMenu.Show();
         }
     }
 	
@@ -59,24 +114,27 @@ public class PhysicsInputManager : MonoBehaviour {
 			foreach (RigidHand hand in hands) {
 				if (hand.isActiveAndEnabled) {
 					foreach (RigidFinger finger in hand.fingers) {
-						Transform bone = finger.bones[3];
-						Vector3 point = input.GetNearestPoint(bone.position);
-						float dist = Vector3.Distance(point, bone.position);
+                        if (input.Touchable) {
+                            Transform bone = finger.bones[3];
+                            Vector3 point = input.GetNearestPoint(bone.position);
+                            float dist = Vector3.Distance(point, bone.position);
 
-                        // If bone->point lines up with the normal, we're behind the interaction surface
-                        Vector3 delta = point - bone.position;
-                        float dot = Vector3.Dot(delta, input.InteractionNormal);
-                        if (dot > 0 && Mathf.Abs(dot) < dist+0.01f) {
-                            dist = 0.0f;
+                            // If bone->point lines up with the normal, we're behind the interaction surface and treat distance as 0
+                            // This is limited to points directly behind the surface, and within a reasonable distance
+                            Vector3 delta = point - bone.position;
+                            float dot = Vector3.Dot(delta, input.InteractionNormal);
+                            if (dot > 0 && Mathf.Abs(dot) > dist-0.01f && dist < 0.5f*hoverDistance) {
+                                dist = 0.0f;
+                            }
+
+                            if (dist < closestDist) {
+                                closestBone = bone;
+                                closestPoint = point;
+                                closestNormal = input.InteractionNormal;
+                                closestDist = dist;
+                                targetInput = input;
+                            }
                         }
-
-						if (dist < closestDist) {
-							closestBone = bone;
-							closestPoint = point;
-							closestNormal = input.InteractionNormal;
-							closestDist = dist;
-							targetInput = input;
-						}
 					}
 				}
 			}

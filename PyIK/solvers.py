@@ -101,7 +101,7 @@ class IKSolver:
         """
         (x,y,z) = self.wrist_normal
         self.wrist_x = np.pi/2 - np.arctan2(z, x) - self.swing
-        self.wrist_y = np.arctan2(y, z)
+        self.wrist_y = np.arctan2(-y, z)
 
     def setGoal(self, goal):
         """
