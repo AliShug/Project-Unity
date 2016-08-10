@@ -46,6 +46,12 @@ public class SocketTest : MonoBehaviour {
 
 	// Use this for initialization
 	void Start() {
+        if (RecordingManager.Instance.mode == RecordingManager.Mode.Playback) {
+            // Disabled during recording playback
+            enabled = false;
+            return;
+        }
+
 		sockIn = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 		try {
 			sockIn.Bind(new IPEndPoint(IPAddress.Loopback, bindPort));
@@ -67,28 +73,30 @@ public class SocketTest : MonoBehaviour {
 	
 	// Update is called once per frame, if enabled
 	void Update() {
-		// Updating the IK goal - UDP packet sent to the python app
-        //  1 x 1 : enable-arm
-        //  4 x 3 : goal-position
-        //  4 x 3 : goal-orient
-		byte[] send_raw = new byte[4 + sizeof(float)*6];
-        Vector3 norm = transform.InverseTransformDirection(interactionTargetTransform.forward);
-		Vector3 pos = transform.InverseTransformPoint(interactionTargetTransform.position);
+        if (interactionTargetTransform.gameObject.activeInHierarchy) {
+            // Updating the IK goal - UDP packet sent to the python app
+            //  1 x 1 : enable-arm
+            //  4 x 3 : goal-position
+            //  4 x 3 : goal-orient
+            byte[] send_raw = new byte[4 + sizeof(float)*6];
+            Vector3 norm = transform.InverseTransformDirection(interactionTargetTransform.forward);
+            Vector3 pos = transform.InverseTransformPoint(interactionTargetTransform.position);
 
-        // enable
-        send_raw[0] = Convert.ToByte(true);
-        send_raw[1] = 0;
-        send_raw[2] = 0;
-        send_raw[3] = 0;
-        // goal pos
-        BitConverter.GetBytes(pos.x).CopyTo(send_raw, 4);
-        BitConverter.GetBytes(pos.y - 0.0296f).CopyTo(send_raw, 4 + 1*sizeof(float));
-        BitConverter.GetBytes(pos.z).CopyTo(send_raw, 4 + 2*sizeof(float));
-        // goal orient
-        BitConverter.GetBytes(norm.x).CopyTo(send_raw, 4 + 3*sizeof(float));
-        BitConverter.GetBytes(norm.y).CopyTo(send_raw, 4 + 4*sizeof(float));
-        BitConverter.GetBytes(norm.z).CopyTo(send_raw, 4 + 5*sizeof(float));
-		sockOut.Send(send_raw);
+            // enable
+            send_raw[0] = Convert.ToByte(true);
+            send_raw[1] = 0;
+            send_raw[2] = 0;
+            send_raw[3] = 0;
+            // goal pos
+            BitConverter.GetBytes(pos.x).CopyTo(send_raw, 4);
+            BitConverter.GetBytes(pos.y - 0.0296f).CopyTo(send_raw, 4 + 1*sizeof(float));
+            BitConverter.GetBytes(pos.z).CopyTo(send_raw, 4 + 2*sizeof(float));
+            // goal orient
+            BitConverter.GetBytes(norm.x).CopyTo(send_raw, 4 + 3*sizeof(float));
+            BitConverter.GetBytes(norm.y).CopyTo(send_raw, 4 + 4*sizeof(float));
+            BitConverter.GetBytes(norm.z).CopyTo(send_raw, 4 + 5*sizeof(float));
+            sockOut.Send(send_raw);
+        }
 
         // Receive stuff
 		//int nbytes = sockIn.Available;

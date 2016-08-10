@@ -9,7 +9,7 @@ from util import *
 
 MOTORSPEED = 0.9
 MOTORMARGIN = 1
-MOTORSLOPE = 32
+MOTORSLOPE = 40
 
 class ArmConfig:
     """Holds an arm's proportions, limits and other configuration data"""

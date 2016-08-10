@@ -111,6 +111,7 @@ public class RecordingManager : MonoBehaviour {
     internal class RecordingData {
         public int interval;
         public List<RecFrame> frames = new List<RecFrame>();
+        public string metadata;
     }
 
     public enum Mode {
@@ -193,6 +194,7 @@ public class RecordingManager : MonoBehaviour {
                 if (fs != null)
                     fs.Close();
             }
+            Debug.Log(_recording.metadata);
             // Fill out the object mapping dictionary
             _objects = transform.root.GetComponentsInChildren<Recorder>(true);
             foreach (Recorder rec in _objects) {

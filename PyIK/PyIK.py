@@ -22,8 +22,8 @@ from util import *
 RECV_PORT = 14001
 TRAN_PORT = 14002
 
-MAX_SPEED = 35.0
-ACCEL = 1.2
+MAX_SPEED = 40.0
+ACCEL = 1.7
 DECEL = 0.8
 
 import pdb;

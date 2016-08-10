@@ -13,8 +13,19 @@ public class PhysicsInputManager : MonoBehaviour {
 
     public PhysicsMenu defaultMenu;
 
+    private PhysicsMenu _currrentMenu;
+    public PhysicsMenu CurrentMenu {
+        get {
+            return _currrentMenu;
+        }
+        set {
+            _currrentMenu = value;
+        }
+    }
+
     public bool holdTarget = false;
 
+    public Transform safeZone;
 	public Transform displayTargetWidget;
 	public Transform displayBoneWidget;
 
@@ -40,6 +51,10 @@ public class PhysicsInputManager : MonoBehaviour {
             }
         }
     }
+
+    // Physical touch enable/disable (arm moves out of the way when disabled)
+    [SerializeField]
+    private bool _touchActive = false;
 
 	public RigidHand[] hands;
 
@@ -70,6 +85,10 @@ public class PhysicsInputManager : MonoBehaviour {
     }
 
     void Start() {
+        if (safeZone == null) {
+            Debug.LogError("Arm operation requires the safe-zone to be specified");
+        }
+
         // Hide all but the default menu
         // active any disabled menus (disabled for practical reasons in-editor)
         if (defaultMenu != null) {
@@ -80,6 +99,7 @@ public class PhysicsInputManager : MonoBehaviour {
             }
 
             defaultMenu.Show();
+            _currrentMenu = defaultMenu;
         }
     }
 	
@@ -108,6 +128,16 @@ public class PhysicsInputManager : MonoBehaviour {
         Vector3 interactionPoint = new Vector3();
 		Transform closestBone = null;
 		InteractiveObject targetInput = null;
+
+        // Count up the active hands
+        int activeHands = 0;
+        RigidHand activeHand = null;
+        foreach (var hand in hands) {
+            if (hand.isActiveAndEnabled) {
+                activeHands++;
+                activeHand = hand;
+            }
+        }
 
 		// We cycle through every finger-end collider in both hands and for all inputs to find the likely interaction target
 		foreach (InteractiveObject input in childInputs) {
@@ -165,23 +195,56 @@ public class PhysicsInputManager : MonoBehaviour {
 				displayBoneWidget.position = closestBone.position;
 			}
 		}
+        else if (activeHands == 1) {
+            // Only one hand to follow
+            if (displayTargetWidget && !holdTarget) {
+                displayTargetWidget.gameObject.SetActive(true);
+                Vector3 offset = new Vector3(0.0f, 0.0f, 0.18f);
+                // offset from index finger's end
+                displayTargetWidget.position = activeHand.fingers[1].bones[3].transform.position + offset;
+            }
+
+            if (displayBoneWidget) {
+                displayBoneWidget.gameObject.SetActive(false);
+            }
+        }
+        // No (or both) hands visible
 		else {
 			// Dehover
 			if (_lastHovered) {
 				_lastHovered.HoverExit();
 				_lastHovered = null;
 			}
-
-			// Hide debug stuff
-			if (displayTargetWidget) {
-				displayTargetWidget.gameObject.SetActive(false);
-			}
-			if (displayBoneWidget) {
-				displayBoneWidget.gameObject.SetActive(false);
-			}
+            // Hide the arm (not used)
+            RetractArm();
 		}
+
+        // Regardless of anything else, retract if touch is disabled
+        if (!_touchActive) {
+            RetractArm();
+        }
 
         // Capacitive sensor update
         UpdateSensor();
 	}
+
+    void RetractArm() {
+        // Track to safe zone
+        if (displayTargetWidget && !holdTarget) {
+            displayTargetWidget.gameObject.SetActive(true);
+            displayTargetWidget.transform.position = safeZone.transform.position;
+            displayTargetWidget.transform.rotation = safeZone.transform.rotation;
+        }
+        if (displayBoneWidget) {
+            displayBoneWidget.gameObject.SetActive(false);
+        }
+    }
+
+    public void DisableTouch() {
+        _touchActive = false;
+    }
+
+    public void EnableTouch() {
+        _touchActive = true;
+    }
 }

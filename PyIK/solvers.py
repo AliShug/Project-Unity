@@ -1,5 +1,8 @@
 from __future__ import print_function
 
+import math
+import pdb
+
 import numpy as np
 
 from util import *
@@ -53,8 +56,10 @@ class PhysicalSolver:
         Xsq = D**2 + C**2 - 2*D*C*np.cos(base_angle)
         X = np.sqrt(Xsq)
         # foo and bar are the two angles adjacent to X in the quat
-        foo = np.arccos((Xsq + C**2 - D**2) / (2*X*C))
-        bar = np.arccos((Xsq + B**2 - A**2) / (2*X*B))
+        cosFoo = np.clip((Xsq + C**2 - D**2) / (2*X*C), -1, 1)
+        cosBar = np.clip((Xsq + B**2 - A**2) / (2*X*B), -1, 1)
+        foo = np.arccos(cosFoo)
+        bar = np.arccos(cosBar)
         # together they form the angle between the main arm and forearm
         return foo + bar
 
@@ -69,8 +74,10 @@ class PhysicalSolver:
         Ysq = C**2 + B**2 - 2*C*B*np.cos(desired)
         Y = np.sqrt(Ysq)
         # foo and bar are the two angles adjacent to Y in the quat
-        foo = np.arccos((Ysq + D**2 - A**2) / (2*Y*D))
-        bar = np.arccos((Ysq + C**2 - B**2) / (2*Y*C))
+        cosFoo = np.clip((Ysq + D**2 - A**2) / (2*Y*D), -1, 1)
+        cosBar = np.clip((Ysq + C**2 - B**2) / (2*Y*C), -1, 1)
+        foo = np.arccos(cosFoo)
+        bar = np.arccos(cosBar)
         # together they form the angle between the main arm and actuator
         base_angle = foo + bar
         return base_angle

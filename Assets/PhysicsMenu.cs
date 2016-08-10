@@ -1,10 +1,34 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 
 public class PhysicsMenu : MonoBehaviour {
 
-    public PhysicsMenu previous;
-    public PhysicsMenu next;
+    [SerializeField]
+    private PhysicsMenu _previous;
+    [SerializeField]
+    private PhysicsMenu _next;
+
+    public virtual PhysicsMenu PreviousMenu {
+        get {
+            return _previous;
+        }
+        protected set {
+            _previous = value;
+        }
+    }
+    public virtual PhysicsMenu NextMenu {
+        get {
+            return _next;
+        }
+        protected set {
+            _next = value;
+        }
+    }
+
+    // In/out events
+    public UnityEvent onShow;
+    public UnityEvent onHide;
 
     private IEnumerator switchTimer;
 
@@ -12,6 +36,7 @@ public class PhysicsMenu : MonoBehaviour {
         yield return new WaitForSeconds(0.05f);
         Hide();
         yield return new WaitForSeconds(time);
+        GetComponentInParent<PhysicsInputManager>().CurrentMenu = menu;
         menu.Show();
     }
 
@@ -24,15 +49,17 @@ public class PhysicsMenu : MonoBehaviour {
     }
 
     public void Show() {
-        OnShow();
         var children = GetComponentsInChildren<InteractiveObject>(true);
         foreach (var child in children) {
             child.PhysicsReset();
             child.gameObject.SetActive(true);
         }
+        onShow.Invoke();
+        OnShow();
     }
 
 	public void Hide() {
+        onHide.Invoke();
         OnHide();
         var children = GetComponentsInChildren<InteractiveObject>(true);
         foreach (var child in children) {
@@ -41,14 +68,14 @@ public class PhysicsMenu : MonoBehaviour {
     }
 
     public void Next() {
-        if (next != null) {
-            SwitchTo(next);
+        if (NextMenu != null) {
+            SwitchTo(NextMenu);
         }
     }
 
     public void Previous() {
-        if (previous != null) {
-            SwitchTo(previous);
+        if (PreviousMenu != null) {
+            SwitchTo(PreviousMenu);
         }
     }
 
