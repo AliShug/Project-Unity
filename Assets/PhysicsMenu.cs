@@ -4,6 +4,10 @@ using System.Collections;
 
 public class PhysicsMenu : MonoBehaviour {
 
+    public bool touchEnabled = false;
+    public bool showIntroScreen = false;
+    public bool showEndScreen = false;
+
     [SerializeField]
     private PhysicsMenu _previous;
     [SerializeField]
@@ -30,10 +34,11 @@ public class PhysicsMenu : MonoBehaviour {
     public UnityEvent onShow;
     public UnityEvent onHide;
 
-    private IEnumerator switchTimer;
+    private IEnumerator _switchTimer;
+    private bool _selected = false;
 
     public IEnumerator WaitAndSwitch(float time, PhysicsMenu menu) {
-        yield return new WaitForSeconds(0.05f);
+        yield return new WaitForSeconds(0.1f);
         Hide();
         yield return new WaitForSeconds(time);
         GetComponentInParent<PhysicsInputManager>().CurrentMenu = menu;
@@ -56,6 +61,9 @@ public class PhysicsMenu : MonoBehaviour {
         }
         onShow.Invoke();
         OnShow();
+
+        _selected = true;
+        ApplySettings();
     }
 
 	public void Hide() {
@@ -65,6 +73,8 @@ public class PhysicsMenu : MonoBehaviour {
         foreach (var child in children) {
             child.gameObject.SetActive(false);
         }
+
+        _selected = false;
     }
 
     public void Next() {
@@ -80,11 +90,30 @@ public class PhysicsMenu : MonoBehaviour {
     }
 
     public void SwitchTo(PhysicsMenu menu) {
-        switchTimer = WaitAndSwitch(0.3f, menu);
-        StartCoroutine(switchTimer);
+        _switchTimer = WaitAndSwitch(0.3f, menu);
+        StartCoroutine(_switchTimer);
 
         RecordingManager.Instance.Log(string.Format(
             "EVENT: menu_transition from=<{0}> to=<{1}>",
             name, menu.name));
+    }
+
+    private void ApplySettings() {
+        InfoText textComp = GetComponent<InfoText>();
+        if (textComp != null) {
+            TactisDemo.Instance.infoText.text = textComp.text;
+        }
+
+        Animator infoAnim = TactisDemo.Instance.infoAnim;
+        infoAnim.SetBool("show_intro", showIntroScreen);
+        infoAnim.SetBool("end", showEndScreen);
+        infoAnim.SetBool("show_pane", textComp != null);
+
+        if (touchEnabled) {
+            GetComponentInParent<PhysicsInputManager>().EnableTouch();
+        }
+        else {
+            GetComponentInParent<PhysicsInputManager>().DisableTouch();
+        }
     }
 }

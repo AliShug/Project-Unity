@@ -30,7 +30,6 @@ public class ReactionMenu : PhysicsMenu {
         var buttons = GetComponentsInChildren<PhysicsInput>(true);
         var usedPositions = new List<Vector3>();
         foreach (var btn in buttons) {
-            Debug.Log(btn);
             Vector3 newPos = new Vector3();
             float dist = 0.0f;
             while (dist < 0.08f) {
@@ -52,7 +51,7 @@ public class ReactionMenu : PhysicsMenu {
                 }
             }
             usedPositions.Add(newPos);
-            btn.transform.localPosition = newPos;
+            btn.MoveLocal(newPos);
             // Force the physics joint to reset
             btn.gameObject.SetActive(false);
             btn.gameObject.SetActive(true);
@@ -65,6 +64,7 @@ public class ReactionMenu : PhysicsMenu {
         base.OnHide();
         if (_displayCount >= displayIterations) {
             onNext.Invoke();
+            _displayCount = 0;
         }
     }
 

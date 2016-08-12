@@ -161,6 +161,14 @@ public class PhysicsInput : InteractiveObject {
         GetComponent<Rigidbody>().velocity = new Vector3();
     }
 
+    protected override void OnMove() {
+        base.OnMove();
+        _originalPosition = transform.position;
+        _clicked = false;
+        _homeDistance = 0.0f;
+        GetComponent<Rigidbody>().velocity = new Vector3();
+    }
+
     // Triggering for simple click model
     void OnTriggerEnter(Collider other) {
         if (_mode == Mode.Simple && !_clicked) {

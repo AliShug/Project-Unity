@@ -128,6 +128,8 @@ public class RecordingManager : MonoBehaviour {
     public int frameInterval = 3;
     private int _fixedFrameInterval;
 
+    public Camera mainCamera;
+
     private Recorder[] _objects;
     private CustomPlayback[] _playbackObjects;
     private Dictionary<string, Recorder> _objectMapping = new Dictionary<string, Recorder>();
@@ -166,6 +168,9 @@ public class RecordingManager : MonoBehaviour {
             // Fill out the object mapping dictionary
             _objects = transform.root.GetComponentsInChildren<Recorder>(true);
             foreach (Recorder rec in _objects) {
+                if (_objectMapping.ContainsKey(rec.uniqueID)) {
+                    Debug.LogErrorFormat("Recorder ID {0} already used by {1}", rec.uniqueID, _objectMapping[rec.uniqueID]);
+                }
                 _objectMapping.Add(rec.uniqueID, rec);
                 Debug.Log("Recording "+rec.uniqueID);
             }
@@ -198,6 +203,9 @@ public class RecordingManager : MonoBehaviour {
             // Fill out the object mapping dictionary
             _objects = transform.root.GetComponentsInChildren<Recorder>(true);
             foreach (Recorder rec in _objects) {
+                if (_objectMapping.ContainsKey(rec.uniqueID)) {
+                    Debug.LogErrorFormat("Recorder ID {0} already used by {1}", rec.uniqueID, _objectMapping[rec.uniqueID]);
+                }
                 _objectMapping.Add(rec.uniqueID, rec);
                 Rigidbody body = rec.GetComponent<Rigidbody>();
                 if (body != null) {
@@ -211,6 +219,9 @@ public class RecordingManager : MonoBehaviour {
             foreach (CustomPlayback player in _playbackObjects) {
                 _playbackMapping.Add(player.uniqueID, player);
             }
+
+            // Display the arm in the main view
+            mainCamera.cullingMask |= 1 << LayerMask.NameToLayer("Arm");
         }
         else if (mode == Mode.Off) {
             // Deactivate playback objects
@@ -299,7 +310,11 @@ public class RecordingManager : MonoBehaviour {
     // Enable logging of arbitrary information
     public void Log(string str) {
         if (mode == Mode.Record) {
+            Debug.LogFormat("<recorded> {0}", str);
             _messages.Enqueue(str);
+        }
+        else if (mode == Mode.Off) {
+            Debug.LogFormat("<recording off> {0}", str);
         }
     }
 }

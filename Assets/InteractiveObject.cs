@@ -35,6 +35,18 @@ public class InteractiveObject : MonoBehaviour {
         OnUpdate();
     }
 
+    public void Move(Vector3 newPosition) {
+        transform.position = newPosition;
+        OnMove();
+    }
+
+    public void MoveLocal(Vector3 newPosition) {
+        transform.localPosition = newPosition;
+        OnMove();
+    }
+
+    protected virtual void OnMove() { return; }
+
     public void PhysicsReset() {
         _hovering = false;
         OnPhysicsReset();

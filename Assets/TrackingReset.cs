@@ -15,6 +15,12 @@ public class TrackingReset : MonoBehaviour {
 	void Start() {
 		_desiredPos = tracker.transform.position;
 		//StartCoroutine("timedReset");
+
+        if (RecordingManager.Instance.mode == RecordingManager.Mode.Playback) {
+            // disable calibration
+            calibrationUI.gameObject.SetActive(false);
+            enabled = false;
+        }
 	}
 
 	void Update () {

@@ -13,13 +13,13 @@ public class PhysicsInputManager : MonoBehaviour {
 
     public PhysicsMenu defaultMenu;
 
-    private PhysicsMenu _currrentMenu;
+    private PhysicsMenu _currentMenu;
     public PhysicsMenu CurrentMenu {
         get {
-            return _currrentMenu;
+            return _currentMenu;
         }
         set {
-            _currrentMenu = value;
+            _currentMenu = value;
         }
     }
 
@@ -99,7 +99,7 @@ public class PhysicsInputManager : MonoBehaviour {
             }
 
             defaultMenu.Show();
-            _currrentMenu = defaultMenu;
+            _currentMenu = defaultMenu;
         }
     }
 	
@@ -172,7 +172,7 @@ public class PhysicsInputManager : MonoBehaviour {
 
 		if (targetInput) {
 			// Hover selection logic <THERE CAN BE ONLY ONE>
-			if (!_lastHovered) {
+			if (!_lastHovered || !_lastHovered.gameObject.activeInHierarchy) {
 				targetInput.HoverEnter();
 				_lastHovered = targetInput;
 			}
@@ -196,7 +196,15 @@ public class PhysicsInputManager : MonoBehaviour {
 			}
 		}
         else if (activeHands == 1) {
+            // Hand-follow behaviour
             // Only one hand to follow
+            
+            // Dehover
+            if (_lastHovered) {
+                _lastHovered.HoverExit();
+                _lastHovered = null;
+            }
+            // move to offset from index finger
             if (displayTargetWidget && !holdTarget) {
                 displayTargetWidget.gameObject.SetActive(true);
                 Vector3 offset = new Vector3(0.0f, 0.0f, 0.18f);
@@ -226,6 +234,11 @@ public class PhysicsInputManager : MonoBehaviour {
 
         // Capacitive sensor update
         UpdateSensor();
+
+        // Trigger next menu
+        if (Input.GetButtonDown("Submit")) {
+            _currentMenu.Next();
+        }
 	}
 
     void RetractArm() {
