@@ -66,11 +66,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getID <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setID <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setReturnDelay(self, val):
@@ -84,11 +84,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getReturnDelay <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setReturnDelay <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setMaxTorque(self, val):
@@ -102,11 +102,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getMaxTorque <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setMaxTorque <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setTorqueEnable(self, val):
@@ -120,11 +120,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getTorqueEnable <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setTorqueEnable <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setLED(self, val):
@@ -138,11 +138,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getLED <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setLED <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setGoalPosition(self, val):
@@ -156,11 +156,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getGoalPosition <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setGoalPosition <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setGoalSpeed(self, val):
@@ -174,11 +174,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getGoalSpeed <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setGoalSpeed <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setTorqueLimit(self, val):
@@ -192,11 +192,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getTorqueLimit <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setTorqueLimit <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setCWMargin(self, val):
@@ -210,11 +210,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getCWMargin <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setCWMargin <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setCCWMargin(self, val):
@@ -228,11 +228,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getCCWMargin <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setCCWMargin <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setCWSlope(self, val):
@@ -246,11 +246,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getCWSlope <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setCWSlope <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def setCCWSlope(self, val):
@@ -264,11 +264,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in getCCWSlope <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in setCCWSlope <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
     def getModelNumber(self):
@@ -284,13 +284,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getModelNumber <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getModelNumber <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getFirmwareVersion(self):
         command = 'g\x01{pver}{packedid}'.format(
@@ -305,13 +305,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getFirmwareVersion <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getFirmwareVersion <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getID(self):
         command = 'g\x02{pver}{packedid}'.format(
@@ -326,13 +326,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getID <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getID <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getReturnDelay(self):
         command = 'g\x03{pver}{packedid}'.format(
@@ -347,13 +347,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getReturnDelay <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getReturnDelay <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getMaxTorque(self):
         command = 'g\x04{pver}{packedid}'.format(
@@ -368,13 +368,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getMaxTorque <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getMaxTorque <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getTorqueEnable(self):
         command = 'g\x05{pver}{packedid}'.format(
@@ -389,13 +389,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getTorqueEnable <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getTorqueEnable <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getLED(self):
         command = 'g\x06{pver}{packedid}'.format(
@@ -410,13 +410,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getLED <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getLED <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getVoltage(self):
         command = 'g\x07{pver}{packedid}'.format(
@@ -431,13 +431,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getVoltage <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getVoltage <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getPosition(self):
         command = 'g\x08{pver}{packedid}'.format(
@@ -452,13 +452,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getPosition <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getPosition <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getLoad(self):
         command = 'g\x09{pver}{packedid}'.format(
@@ -473,13 +473,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getLoad <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getLoad <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getTemperature(self):
         command = 'g\x0A{pver}{packedid}'.format(
@@ -494,13 +494,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getTemperature <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getTemperature <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getSpeed(self):
         command = 'g\x0B{pver}{packedid}'.format(
@@ -515,13 +515,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getSpeed <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getSpeed <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getGoalPosition(self):
         command = 'g\x0C{pver}{packedid}'.format(
@@ -536,13 +536,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getGoalPosition <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getGoalPosition <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getGoalSpeed(self):
         command = 'g\x0D{pver}{packedid}'.format(
@@ -557,13 +557,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getGoalSpeed <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getGoalSpeed <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getTorqueLimit(self):
         command = 'g\x0E{pver}{packedid}'.format(
@@ -578,13 +578,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getTorqueLimit <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getTorqueLimit <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getCWMargin(self):
         command = 'g\x0F{pver}{packedid}'.format(
@@ -599,13 +599,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getCWMargin <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getCWMargin <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getCCWMargin(self):
         command = 'g\x10{pver}{packedid}'.format(
@@ -620,13 +620,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getCCWMargin <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getCCWMargin <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getCWSlope(self):
         command = 'g\x11{pver}{packedid}'.format(
@@ -641,13 +641,13 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getCWSlope <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getCWSlope <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
     def getCCWSlope(self):
         command = 'g\x12{pver}{packedid}'.format(
@@ -662,12 +662,12 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in getCCWSlope <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in getCCWSlope <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
 #def getServos():

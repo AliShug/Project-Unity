@@ -71,11 +71,11 @@ class Servo:
         waitFor(self.serial, 2)
 
         # Response
-        res = 'ERROR: Nothing received'
+        res = 'Timeout in get{{c.name}} <dx{0}:{1}>'.format(self.protocol, self.id)
         while self.serial.in_waiting > 0:
             res = self.serial.readline()
         if res.startswith('ERROR'):
-            print (res)
+            print ('Servo Error in set{{c.name}} <dx{0}:{1}> {2}'.format(self.protocol, self.id, res))
             return False
         return True
 {% endfor %}
@@ -93,7 +93,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('ERR: ',arg+self.serial.readline())
+                print ('Servo Error in get{{c.name}} <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             {% if c.type == 'int' %}
@@ -103,7 +103,7 @@ class Servo:
             {% endif %}
             return val
         except Exception as e:
-            print ('ERR: Bad receive', e)
+            print ('Bad receive in get{{c.name}} <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None
 {% endfor %}
 #def getServos():
