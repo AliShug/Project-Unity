@@ -2,7 +2,8 @@
 using UnityEngine.Events;
 using System.Collections;
 
-public class PhysicsMenu : MonoBehaviour {
+public class PhysicsMenu : MonoBehaviour
+{
 
     public bool touchEnabled = false;
     public bool showIntroScreen = false;
@@ -13,19 +14,25 @@ public class PhysicsMenu : MonoBehaviour {
     [SerializeField]
     private PhysicsMenu _next;
 
-    public virtual PhysicsMenu PreviousMenu {
-        get {
+    public virtual PhysicsMenu PreviousMenu
+    {
+        get
+        {
             return _previous;
         }
-        protected set {
+        protected set
+        {
             _previous = value;
         }
     }
-    public virtual PhysicsMenu NextMenu {
-        get {
+    public virtual PhysicsMenu NextMenu
+    {
+        get
+        {
             return _next;
         }
-        protected set {
+        protected set
+        {
             _next = value;
         }
     }
@@ -37,7 +44,8 @@ public class PhysicsMenu : MonoBehaviour {
     private IEnumerator _switchTimer;
     private bool _selected = false;
 
-    public IEnumerator WaitAndSwitch(float time, PhysicsMenu menu) {
+    public IEnumerator WaitAndSwitch(float time, PhysicsMenu menu)
+    {
         yield return new WaitForSeconds(0.1f);
         Hide();
         yield return new WaitForSeconds(time);
@@ -45,17 +53,21 @@ public class PhysicsMenu : MonoBehaviour {
         menu.Show();
     }
 
-    protected virtual void OnShow() {
+    protected virtual void OnShow()
+    {
         return;
     }
 
-    protected virtual void OnHide() {
+    protected virtual void OnHide()
+    {
         return;
     }
 
-    public void Show() {
+    public void Show()
+    {
         var children = GetComponentsInChildren<InteractiveObject>(true);
-        foreach (var child in children) {
+        foreach (var child in children)
+        {
             child.PhysicsReset();
             child.gameObject.SetActive(true);
         }
@@ -66,30 +78,37 @@ public class PhysicsMenu : MonoBehaviour {
         ApplySettings();
     }
 
-	public void Hide() {
+    public void Hide()
+    {
         onHide.Invoke();
         OnHide();
         var children = GetComponentsInChildren<InteractiveObject>(true);
-        foreach (var child in children) {
+        foreach (var child in children)
+        {
             child.gameObject.SetActive(false);
         }
 
         _selected = false;
     }
 
-    public void Next() {
-        if (NextMenu != null) {
+    public void Next()
+    {
+        if (NextMenu != null)
+        {
             SwitchTo(NextMenu);
         }
     }
 
-    public void Previous() {
-        if (PreviousMenu != null) {
+    public void Previous()
+    {
+        if (PreviousMenu != null)
+        {
             SwitchTo(PreviousMenu);
         }
     }
 
-    public void SwitchTo(PhysicsMenu menu) {
+    public void SwitchTo(PhysicsMenu menu)
+    {
         _switchTimer = WaitAndSwitch(0.3f, menu);
         StartCoroutine(_switchTimer);
 
@@ -98,12 +117,15 @@ public class PhysicsMenu : MonoBehaviour {
             name, menu.name));
     }
 
-    private void ApplySettings() {
+    private void ApplySettings()
+    {
         // Demo-specific stuff
         var demo = TactisDemo.Instance;
-        if (demo != null) {
+        if (demo != null)
+        {
             InfoText textComp = GetComponent<InfoText>();
-            if (textComp != null) {
+            if (textComp != null)
+            {
                 TactisDemo.Instance.infoText.text = textComp.text;
             }
 
@@ -114,10 +136,12 @@ public class PhysicsMenu : MonoBehaviour {
         }
 
         // General
-        if (touchEnabled) {
+        if (touchEnabled)
+        {
             GetComponentInParent<PhysicsInputManager>().EnableTouch();
         }
-        else {
+        else
+        {
             GetComponentInParent<PhysicsInputManager>().DisableTouch();
         }
     }

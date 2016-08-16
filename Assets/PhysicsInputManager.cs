@@ -4,9 +4,11 @@ using Leap.Unity;
 
 using MeshExtensions; // custom extension methods
 
-public class PhysicsInputManager : MonoBehaviour {
+public class PhysicsInputManager : MonoBehaviour
+{
 
-    public enum Handedness {
+    public enum Handedness
+    {
         Both,
         Left, Right
     }
@@ -14,11 +16,14 @@ public class PhysicsInputManager : MonoBehaviour {
     public PhysicsMenu defaultMenu;
 
     private PhysicsMenu _currentMenu;
-    public PhysicsMenu CurrentMenu {
-        get {
+    public PhysicsMenu CurrentMenu
+    {
+        get
+        {
             return _currentMenu;
         }
-        set {
+        set
+        {
             _currentMenu = value;
         }
     }
@@ -26,27 +31,33 @@ public class PhysicsInputManager : MonoBehaviour {
     public bool holdTarget = false;
 
     public Transform safeZone;
-	public Transform displayTargetWidget;
-	public Transform displayBoneWidget;
+    public Transform displayTargetWidget;
+    public Transform displayBoneWidget;
 
     public LeapHandController handController;
 
     [SerializeField]
     private Handedness _handChoice = Handedness.Both;
-    public Handedness HandChoice {
-        get {
+    public Handedness HandChoice
+    {
+        get
+        {
             return _handChoice;
         }
-        set {
-            if (value == Handedness.Left) {
+        set
+        {
+            if (value == Handedness.Left)
+            {
                 handController.enableLeft = true;
                 handController.enableRight = false;
             }
-            else if (value == Handedness.Right) {
+            else if (value == Handedness.Right)
+            {
                 handController.enableLeft = false;
                 handController.enableRight = true;
             }
-            else if (value == Handedness.Both) {
+            else if (value == Handedness.Both)
+            {
                 handController.enableLeft = handController.enableRight = true;
             }
         }
@@ -56,45 +67,53 @@ public class PhysicsInputManager : MonoBehaviour {
     [SerializeField]
     private bool _touchActive = false;
 
-	public RigidHand[] hands;
+    public RigidHand[] hands;
 
-	public float hoverDistance = 0.1f;
+    public float hoverDistance = 0.1f;
     public Vector2 effectorDim;
 
     public SocketTest comms;
     public int sensorThreshold = 500;
 
 
-	private InteractiveObject _lastHovered;
+    private InteractiveObject _lastHovered;
 
     private bool _sensor = false;
-    public bool Sensor {
-        get {
+    public bool Sensor
+    {
+        get
+        {
             return _sensor;
         }
     }
 
     // For UnityEvent connections
-    public void SetLeftHand() {
+    public void SetLeftHand()
+    {
         HandChoice = Handedness.Left;
         RecordingManager.Log("SELECT: hand_choice=left");
     }
-    public void SetRightHand() {
+    public void SetRightHand()
+    {
         HandChoice = Handedness.Right;
         RecordingManager.Log("SELECT: hand_choice=right");
     }
 
-    void Start() {
-        if (safeZone == null) {
+    void Start()
+    {
+        if (safeZone == null)
+        {
             Debug.LogWarning("Arm operation requires the safe-zone to be specified");
             _touchActive = false;
         }
 
         // Hide all but the default menu
         // active any disabled menus (disabled for practical reasons in-editor)
-        if (defaultMenu != null) {
+        if (defaultMenu != null)
+        {
             var menus = GetComponentsInChildren<PhysicsMenu>(true);
-            foreach (var menu in menus) {
+            foreach (var menu in menus)
+            {
                 menu.gameObject.SetActive(true);
                 menu.Hide();
             }
@@ -103,49 +122,61 @@ public class PhysicsInputManager : MonoBehaviour {
             _currentMenu = defaultMenu;
         }
     }
-	
-    void UpdateSensor() {
-        if (comms != null) {
+
+    void UpdateSensor()
+    {
+        if (comms != null)
+        {
             int reading = comms.CapacitiveSensor;
-            if (!_sensor && reading > sensorThreshold) {
+            if (!_sensor && reading > sensorThreshold)
+            {
                 print("Press!");
                 _sensor = true;
             }
-            else if (_sensor && reading < 0.8 * sensorThreshold) {
+            else if (_sensor && reading < 0.8 * sensorThreshold)
+            {
                 print("Release");
                 _sensor = false;
             }
         }
     }
 
-	// Update is called once per frame
-	void Update () {
-		// Grab the current child input components
-		InteractiveObject[] childInputs = transform.GetComponentsInChildren<InteractiveObject>();
+    // Update is called once per frame
+    void Update()
+    {
+        // Grab the current child input components
+        InteractiveObject[] childInputs = transform.GetComponentsInChildren<InteractiveObject>();
 
-		float closestDist = hoverDistance;
-		Vector3 closestPoint = new Vector3();
-		Vector3 closestNormal = new Vector3();
+        float closestDist = hoverDistance;
+        Vector3 closestPoint = new Vector3();
+        Vector3 closestNormal = new Vector3();
         Vector3 interactionPoint = new Vector3();
-		Transform closestBone = null;
-		InteractiveObject targetInput = null;
+        Transform closestBone = null;
+        InteractiveObject targetInput = null;
 
         // Count up the active hands
         int activeHands = 0;
         RigidHand activeHand = null;
-        foreach (var hand in hands) {
-            if (hand.isActiveAndEnabled) {
+        foreach (var hand in hands)
+        {
+            if (hand.isActiveAndEnabled)
+            {
                 activeHands++;
                 activeHand = hand;
             }
         }
 
-		// We cycle through every finger-end collider in both hands and for all inputs to find the likely interaction target
-		foreach (InteractiveObject input in childInputs) {
-			foreach (RigidHand hand in hands) {
-				if (hand.isActiveAndEnabled) {
-					foreach (RigidFinger finger in hand.fingers) {
-                        if (input.Touchable) {
+        // We cycle through every finger-end collider in both hands and for all inputs to find the likely interaction target
+        foreach (InteractiveObject input in childInputs)
+        {
+            foreach (RigidHand hand in hands)
+            {
+                if (hand.isActiveAndEnabled)
+                {
+                    foreach (RigidFinger finger in hand.fingers)
+                    {
+                        if (input.Touchable)
+                        {
                             Transform bone = finger.bones[3];
                             Vector3 point = input.GetNearestPoint(bone.position);
                             float dist = Vector3.Distance(point, bone.position);
@@ -154,11 +185,13 @@ public class PhysicsInputManager : MonoBehaviour {
                             // This is limited to points directly behind the surface, and within a reasonable distance
                             Vector3 delta = point - bone.position;
                             float dot = Vector3.Dot(delta, input.InteractionNormal);
-                            if (dot > 0 && Mathf.Abs(dot) > dist-0.01f && dist < 0.5f*hoverDistance) {
+                            if (dot > 0 && Mathf.Abs(dot) > dist-0.01f && dist < 0.5f*hoverDistance)
+                            {
                                 dist = 0.0f;
                             }
 
-                            if (dist < closestDist) {
+                            if (dist < closestDist)
+                            {
                                 closestBone = bone;
                                 closestPoint = point;
                                 closestNormal = input.InteractionNormal;
@@ -166,70 +199,82 @@ public class PhysicsInputManager : MonoBehaviour {
                                 targetInput = input;
                             }
                         }
-					}
-				}
-			}
-		}
+                    }
+                }
+            }
+        }
 
-		if (targetInput) {
-			// Hover selection logic <THERE CAN BE ONLY ONE>
-			if (!_lastHovered || !_lastHovered.gameObject.activeInHierarchy) {
-				targetInput.HoverEnter();
-				_lastHovered = targetInput;
-			}
-			else if (_lastHovered != targetInput) {
-				_lastHovered.HoverExit();
-				targetInput.HoverEnter();
-				_lastHovered = targetInput;
-			}
+        if (targetInput)
+        {
+            // Hover selection logic <THERE CAN BE ONLY ONE>
+            if (!_lastHovered || !_lastHovered.gameObject.activeInHierarchy)
+            {
+                targetInput.HoverEnter();
+                _lastHovered = targetInput;
+            }
+            else if (_lastHovered != targetInput)
+            {
+                _lastHovered.HoverExit();
+                targetInput.HoverEnter();
+                _lastHovered = targetInput;
+            }
 
             // Get the actual interaction point
             interactionPoint = targetInput.GetInteractionPoint(closestPoint, effectorDim);
-			if (displayTargetWidget && !holdTarget) {
-				displayTargetWidget.gameObject.SetActive(true);
-				displayTargetWidget.position = interactionPoint;
-				Vector3 normalTarget = interactionPoint + closestNormal;
-				displayTargetWidget.LookAt(normalTarget);
-			}
-			if (displayBoneWidget) {
-				displayBoneWidget.gameObject.SetActive(true);
-				displayBoneWidget.position = closestBone.position;
-			}
-		}
-        else if (activeHands == 1) {
+            if (displayTargetWidget && !holdTarget)
+            {
+                displayTargetWidget.gameObject.SetActive(true);
+                displayTargetWidget.position = interactionPoint;
+                Vector3 normalTarget = interactionPoint + closestNormal;
+                displayTargetWidget.LookAt(normalTarget);
+            }
+            if (displayBoneWidget)
+            {
+                displayBoneWidget.gameObject.SetActive(true);
+                displayBoneWidget.position = closestBone.position;
+            }
+        }
+        else if (activeHands == 1)
+        {
             // Hand-follow behaviour
             // Only one hand to follow
-            
+
             // Dehover
-            if (_lastHovered) {
+            if (_lastHovered)
+            {
                 _lastHovered.HoverExit();
                 _lastHovered = null;
             }
             // move to offset from index finger
-            if (displayTargetWidget && !holdTarget) {
+            if (displayTargetWidget && !holdTarget)
+            {
                 displayTargetWidget.gameObject.SetActive(true);
                 Vector3 offset = new Vector3(0.0f, 0.0f, 0.18f);
                 // offset from index finger's end
                 displayTargetWidget.position = activeHand.fingers[1].bones[3].transform.position + offset;
             }
 
-            if (displayBoneWidget) {
+            if (displayBoneWidget)
+            {
                 displayBoneWidget.gameObject.SetActive(false);
             }
         }
         // No (or both) hands visible
-		else {
-			// Dehover
-			if (_lastHovered) {
-				_lastHovered.HoverExit();
-				_lastHovered = null;
-			}
+        else
+        {
+            // Dehover
+            if (_lastHovered)
+            {
+                _lastHovered.HoverExit();
+                _lastHovered = null;
+            }
             // Hide the arm (not used)
             RetractArm();
-		}
+        }
 
         // Regardless of anything else, retract if touch is disabled
-        if (!_touchActive) {
+        if (!_touchActive)
+        {
             RetractArm();
         }
 
@@ -237,32 +282,40 @@ public class PhysicsInputManager : MonoBehaviour {
         UpdateSensor();
 
         // Trigger next menu
-        if (Input.GetButtonDown("Submit")) {
+        if (Input.GetButtonDown("Submit"))
+        {
             _currentMenu.Next();
         }
-	}
+    }
 
-    void RetractArm() {
+    void RetractArm()
+    {
         // Track to safe zone
-        if (displayTargetWidget && !holdTarget) {
+        if (displayTargetWidget && !holdTarget)
+        {
             displayTargetWidget.gameObject.SetActive(true);
             displayTargetWidget.transform.position = safeZone.transform.position;
             displayTargetWidget.transform.rotation = safeZone.transform.rotation;
         }
-        if (displayBoneWidget) {
+        if (displayBoneWidget)
+        {
             displayBoneWidget.gameObject.SetActive(false);
         }
     }
 
-    public void DisableTouch() {
+    public void DisableTouch()
+    {
         _touchActive = false;
     }
 
-    public void EnableTouch() {
-        if (safeZone == null) {
+    public void EnableTouch()
+    {
+        if (safeZone == null)
+        {
             Debug.LogWarning("Arm operation requires the safe-zone to be specified");
         }
-        else {
+        else
+        {
             _touchActive = true;
         }
     }

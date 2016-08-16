@@ -2,7 +2,8 @@
 using System.Collections;
 
 [RequireComponent(typeof(Recorder))]
-public class InteractiveObject : MonoBehaviour {
+public class InteractiveObject : MonoBehaviour
+{
 
     public Transform inputTransform;
 
@@ -10,44 +11,53 @@ public class InteractiveObject : MonoBehaviour {
     public float surfaceOffset = 0.5f;
 
     private bool _hovering = false;
-    public bool Hovered {
+    public bool Hovered
+    {
         get { return _hovering; }
     }
 
-    public virtual bool Touchable {
-        get {
+    public virtual bool Touchable
+    {
+        get
+        {
             return true;
         }
     }
 
     // Use this for initialization
-    void Awake () {
-        if (inputTransform == null) {
+    void Awake()
+    {
+        if (inputTransform == null)
+        {
             inputTransform = transform;
         }
         // Call derived class stuff
         OnStart();
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
         // Call derived class stuff
         OnUpdate();
     }
 
-    public void Move(Vector3 newPosition) {
+    public void Move(Vector3 newPosition)
+    {
         transform.position = newPosition;
         OnMove();
     }
 
-    public void MoveLocal(Vector3 newPosition) {
+    public void MoveLocal(Vector3 newPosition)
+    {
         transform.localPosition = newPosition;
         OnMove();
     }
 
     protected virtual void OnMove() { return; }
 
-    public void PhysicsReset() {
+    public void PhysicsReset()
+    {
         _hovering = false;
         OnPhysicsReset();
     }
@@ -67,19 +77,23 @@ public class InteractiveObject : MonoBehaviour {
 
     protected virtual void OnPhysicsReset() { return; }
 
-    public void HoverEnter() {
-        if (!_hovering) {
+    public void HoverEnter()
+    {
+        if (!_hovering)
+        {
             _hovering = true;
             OnHoverEnter();
         }
     }
 
-    public void HoverExit() {
+    public void HoverExit()
+    {
         _hovering = false;
         OnHoverExit();
     }
 
-    public Vector3 GetNearestPoint(Vector3 poi) {
+    public Vector3 GetNearestPoint(Vector3 poi)
+    {
         Vector3 localPoi = inputTransform.InverseTransformPoint(poi);
         // flatten on z axis
         localPoi.z = surfaceOffset;
@@ -89,7 +103,8 @@ public class InteractiveObject : MonoBehaviour {
         return inputTransform.TransformPoint(localPoi);
     }
 
-    public Vector3 GetInteractionPoint(Vector3 poi, Vector2 effectorDim) {
+    public Vector3 GetInteractionPoint(Vector3 poi, Vector2 effectorDim)
+    {
         Vector3 localPoi = inputTransform.InverseTransformPoint(poi);
         // flatten on z axis
         localPoi.z = surfaceOffset;
@@ -102,15 +117,19 @@ public class InteractiveObject : MonoBehaviour {
         return inputTransform.TransformPoint(localPoi);
     }
 
-    public Vector3 InteractionCenter {
-        get {
+    public Vector3 InteractionCenter
+    {
+        get
+        {
             Vector3 localCenter = new Vector3(0, 0, surfaceOffset);
             return inputTransform.TransformPoint(localCenter);
         }
     }
 
-    public Vector3 InteractionNormal {
-        get {
+    public Vector3 InteractionNormal
+    {
+        get
+        {
             return inputTransform.forward;
         }
     }

@@ -3,48 +3,58 @@ using UnityEngine.Events;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PhysicsInput : InteractiveObject {
+public class PhysicsInput : InteractiveObject
+{
 
     public static int clickThreshold = 500;
 
-    public enum Mode {
+    public enum Mode
+    {
         Simple,
         Complex,
         StaticTouch
     }
 
-	public UnityEvent pressEvent;
-	public UnityEvent releaseEvent;
-	public float clickDistance = 0.02f;
+    public UnityEvent pressEvent;
+    public UnityEvent releaseEvent;
+    public float clickDistance = 0.02f;
 
     public Mode defaultInteractionMode = Mode.Complex;
 
     private Mode _mode;
-    public Mode InteractionMode {
-        get {
+    public Mode InteractionMode
+    {
+        get
+        {
             return _mode;
         }
-        set {
+        set
+        {
             SetMode(value);
         }
     }
 
     private Vector3 _originalPosition;
-	private float _furthestDistance;
-	private float _homeDistance;
+    private float _furthestDistance;
+    private float _homeDistance;
 
-	private bool _clicked = false;
+    private bool _clicked = false;
 
-	public bool Clicked {
-		get { return _clicked; }
-	}
+    public bool Clicked
+    {
+        get { return _clicked; }
+    }
 
-    public override bool Touchable {
-        get {
-            if (_mode == Mode.StaticTouch) {
+    public override bool Touchable
+    {
+        get
+        {
+            if (_mode == Mode.StaticTouch)
+            {
                 return true;
             }
-            else {
+            else
+            {
                 return false;
             }
         }
@@ -54,16 +64,19 @@ public class PhysicsInput : InteractiveObject {
     private List<GameObject> _currentColliders = new List<GameObject>();
 
     // Deals with enabling/disabling the input's physics
-    public void SetMode(Mode newMode) {
+    public void SetMode(Mode newMode)
+    {
         //var rigidbody = GetComponent<Rigidbody>();
         var colliders = GetComponentsInChildren<Collider>();
-        switch (newMode) {
+        switch (newMode)
+        {
             case Mode.Simple:
             case Mode.StaticTouch:
                 // Disable physics
                 //rigidbody.detectCollisions = false;
                 //rigidbody.isKinematic = true;
-                foreach (var collider in colliders) {
+                foreach (var collider in colliders)
+                {
                     collider.isTrigger = true;
                 }
                 PhysicsReset();
@@ -72,7 +85,8 @@ public class PhysicsInput : InteractiveObject {
                 // Enable physics
                 //rigidbody.detectCollisions = true;
                 //rigidbody.isKinematic = false;
-                foreach (var collider in colliders) {
+                foreach (var collider in colliders)
+                {
                     collider.isTrigger = false;
                 }
                 PhysicsReset();
@@ -80,19 +94,22 @@ public class PhysicsInput : InteractiveObject {
         }
         _mode = newMode;
     }
-    
-	// Use this for initialization
-	protected override void OnStart () {
+
+    // Use this for initialization
+    protected override void OnStart()
+    {
         base.OnStart();
-		_originalPosition = transform.position;
-		_homeDistance = 0.0f;
+        _originalPosition = transform.position;
+        _homeDistance = 0.0f;
         SetMode(defaultInteractionMode);
-	}
-	
-	// Call update function for selected mode
-	protected override void OnUpdate () {
+    }
+
+    // Call update function for selected mode
+    protected override void OnUpdate()
+    {
         base.OnUpdate();
-        switch (_mode) {
+        switch (_mode)
+        {
             case Mode.Simple:
                 SimpleUpdate();
                 break;
@@ -103,52 +120,64 @@ public class PhysicsInput : InteractiveObject {
                 StaticTouchUpdate();
                 break;
         }
-	}
+    }
 
-    void SimpleUpdate() {
+    void SimpleUpdate()
+    {
         // Collision-based clicking logic (see OnTriggerEnter/Exit)
     }
 
-    void ComplexUpdate() {
+    void ComplexUpdate()
+    {
         // Physics-based clicking logic - pass click distance from last 'home' point to enter,
         // return < 90% of 'away' point to exit
         float distFromStart = Vector3.Distance(_originalPosition, transform.position);
-        if (_clicked) {
-            if (distFromStart < 0.9f*_furthestDistance) {
+        if (_clicked)
+        {
+            if (distFromStart < 0.9f*_furthestDistance)
+            {
                 // Unclick
                 _clicked = false;
                 _homeDistance = distFromStart;
                 OnClickExit();
                 releaseEvent.Invoke();
             }
-            else if (distFromStart > _furthestDistance) {
+            else if (distFromStart > _furthestDistance)
+            {
                 _furthestDistance = distFromStart;
             }
         }
-        else {
-            if (distFromStart > _homeDistance + clickDistance) {
+        else
+        {
+            if (distFromStart > _homeDistance + clickDistance)
+            {
                 _clicked = true;
                 _furthestDistance = 0.0f;
                 OnClickEnter();
                 pressEvent.Invoke();
             }
-            else if (distFromStart < _homeDistance) {
+            else if (distFromStart < _homeDistance)
+            {
                 _homeDistance = distFromStart;
             }
         }
     }
 
-    void StaticTouchUpdate() {
+    void StaticTouchUpdate()
+    {
         // Capacitive sensor-based clicking logic
         var comms = SocketTest.Instance;
         // Limited to the currently hovered input
-        if (Hovered) {
-            if (comms.CapacitiveSensor > clickThreshold && !_clicked) {
+        if (Hovered)
+        {
+            if (comms.CapacitiveSensor > clickThreshold && !_clicked)
+            {
                 _clicked = true;
                 OnClickEnter();
                 pressEvent.Invoke();
             }
-            else if (comms.CapacitiveSensor < clickThreshold && _clicked) {
+            else if (comms.CapacitiveSensor < clickThreshold && _clicked)
+            {
                 _clicked = false;
                 OnClickExit();
                 releaseEvent.Invoke();
@@ -156,7 +185,8 @@ public class PhysicsInput : InteractiveObject {
         }
     }
 
-    protected override void OnPhysicsReset() {
+    protected override void OnPhysicsReset()
+    {
         base.OnPhysicsReset();
         transform.position = _originalPosition;
         _clicked = false;
@@ -165,7 +195,8 @@ public class PhysicsInput : InteractiveObject {
         _currentColliders.Clear();
     }
 
-    protected override void OnMove() {
+    protected override void OnMove()
+    {
         base.OnMove();
         _originalPosition = transform.position;
         _clicked = false;
@@ -175,21 +206,25 @@ public class PhysicsInput : InteractiveObject {
     }
 
     // Triggering for simple click model
-    void OnTriggerEnter(Collider other) {
+    void OnTriggerEnter(Collider other)
+    {
         _currentColliders.Add(other.gameObject);
 
-        if (_mode == Mode.Simple && !_clicked) {
+        if (_mode == Mode.Simple && !_clicked)
+        {
             _clicked = true;
             OnClickEnter();
             pressEvent.Invoke();
         }
     }
 
-    void OnTriggerExit(Collider other) {
+    void OnTriggerExit(Collider other)
+    {
         _currentColliders.Remove(other.gameObject);
 
         // Only end click once all colliders have exited
-        if (_mode == Mode.Simple && _clicked && _currentColliders.Count == 0) {
+        if (_mode == Mode.Simple && _clicked && _currentColliders.Count == 0)
+        {
             _clicked = false;
             OnClickExit();
             releaseEvent.Invoke();

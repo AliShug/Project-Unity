@@ -2,16 +2,20 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class TactisDemo : MonoBehaviour {
+public class TactisDemo : MonoBehaviour
+{
 
     private static TactisDemo _instance;
-    public static TactisDemo Instance {
-        get {
+    public static TactisDemo Instance
+    {
+        get
+        {
             return _instance;
         }
     }
 
-    public TactisDemo() {
+    public TactisDemo()
+    {
         _instance = this;
     }
 

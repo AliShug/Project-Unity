@@ -2,80 +2,90 @@
 using UnityEngine.Events;
 using System.Collections;
 
-public class PhysicsButton : PhysicsInput {
+public class PhysicsButton : PhysicsInput
+{
 
-	public Color baseColor;
-	public Color hoverColor;
-	public Color pressedColor;
+    public Color baseColor;
+    public Color hoverColor;
+    public Color pressedColor;
 
-	private Color currentColor;
-	private Material materialOriginal;
-	private Material materialUnique;
+    private Color currentColor;
+    private Material materialOriginal;
+    private Material materialUnique;
 
-	public Renderer myRenderer;
-	private Light myLight = null;
+    public Renderer myRenderer;
+    private Light myLight = null;
 
-	protected override void OnStart() {
+    protected override void OnStart()
+    {
         base.OnStart();
 
-		myLight = GetComponent<Light>();
+        myLight = GetComponent<Light>();
 
-		materialOriginal = myRenderer.material;
-		materialUnique = new Material(materialOriginal);
-		materialUnique.EnableKeyword("_EMISSION");
-		myRenderer.material = materialUnique;
-		currentColor = baseColor;
+        materialOriginal = myRenderer.material;
+        materialUnique = new Material(materialOriginal);
+        materialUnique.EnableKeyword("_EMISSION");
+        myRenderer.material = materialUnique;
+        currentColor = baseColor;
 
-		ColorUpdate();
-	}
+        ColorUpdate();
+    }
 
-	/**
+    /**
 	 * Update the button's emissive highlight
 	 */
-	void ColorUpdate() {
+    void ColorUpdate()
+    {
         // Modify our unique material's emissive properties
-        if (materialUnique) {
+        if (materialUnique)
+        {
             materialUnique.SetColor("_EmissionColor", currentColor);
-            if (myLight) {
+            if (myLight)
+            {
                 myLight.color = currentColor;
             }
         }
-	}
+    }
 
-	/**
+    /**
 	 * Called when the object physically enters its depressed (clicked) state
 	 */
-	protected override void OnClickEnter() {
+    protected override void OnClickEnter()
+    {
         base.OnClickEnter();
-		currentColor = pressedColor;
-		ColorUpdate();
-	}
+        currentColor = pressedColor;
+        ColorUpdate();
+    }
 
-	/**
+    /**
 	 * Called when the object physically leaves its depressed state
 	 */
-	protected override void OnClickExit() {
+    protected override void OnClickExit()
+    {
         base.OnClickExit();
-		if (Hovered)
-			currentColor = hoverColor;
-		else
-			currentColor = baseColor;
-		ColorUpdate();
-	}
+        if (Hovered)
+            currentColor = hoverColor;
+        else
+            currentColor = baseColor;
+        ColorUpdate();
+    }
 
-	protected override void OnHoverEnter() {
+    protected override void OnHoverEnter()
+    {
         base.OnHoverEnter();
-		currentColor = hoverColor;
-		ColorUpdate();
-	}
+        currentColor = hoverColor;
+        ColorUpdate();
+    }
 
-	protected override void OnHoverExit() {
+    protected override void OnHoverExit()
+    {
         base.OnHoverExit();
-		currentColor = baseColor;
-		ColorUpdate();
-	}
+        currentColor = baseColor;
+        ColorUpdate();
+    }
 
-    protected override void OnPhysicsReset() {
+    protected override void OnPhysicsReset()
+    {
         base.OnPhysicsReset();
         currentColor = baseColor;
         ColorUpdate();
