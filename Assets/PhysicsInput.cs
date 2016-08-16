@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PhysicsInput : InteractiveObject {
@@ -49,6 +49,9 @@ public class PhysicsInput : InteractiveObject {
             }
         }
     }
+
+    // Collider logic
+    private List<GameObject> _currentColliders = new List<GameObject>();
 
     // Deals with enabling/disabling the input's physics
     public void SetMode(Mode newMode) {
@@ -159,6 +162,7 @@ public class PhysicsInput : InteractiveObject {
         _clicked = false;
         _homeDistance = 0.0f;
         GetComponent<Rigidbody>().velocity = new Vector3();
+        _currentColliders.Clear();
     }
 
     protected override void OnMove() {
@@ -167,10 +171,13 @@ public class PhysicsInput : InteractiveObject {
         _clicked = false;
         _homeDistance = 0.0f;
         GetComponent<Rigidbody>().velocity = new Vector3();
+        _currentColliders.Clear();
     }
 
     // Triggering for simple click model
     void OnTriggerEnter(Collider other) {
+        _currentColliders.Add(other.gameObject);
+
         if (_mode == Mode.Simple && !_clicked) {
             _clicked = true;
             OnClickEnter();
@@ -179,7 +186,10 @@ public class PhysicsInput : InteractiveObject {
     }
 
     void OnTriggerExit(Collider other) {
-        if (_mode == Mode.Simple && _clicked) {
+        _currentColliders.Remove(other.gameObject);
+
+        // Only end click once all colliders have exited
+        if (_mode == Mode.Simple && _clicked && _currentColliders.Count == 0) {
             _clicked = false;
             OnClickExit();
             releaseEvent.Invoke();

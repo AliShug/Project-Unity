@@ -77,16 +77,17 @@ public class PhysicsInputManager : MonoBehaviour {
     // For UnityEvent connections
     public void SetLeftHand() {
         HandChoice = Handedness.Left;
-        RecordingManager.Instance.Log("SELECT: hand_choice=left");
+        RecordingManager.Log("SELECT: hand_choice=left");
     }
     public void SetRightHand() {
         HandChoice = Handedness.Right;
-        RecordingManager.Instance.Log("SELECT: hand_choice=right");
+        RecordingManager.Log("SELECT: hand_choice=right");
     }
 
     void Start() {
         if (safeZone == null) {
-            Debug.LogError("Arm operation requires the safe-zone to be specified");
+            Debug.LogWarning("Arm operation requires the safe-zone to be specified");
+            _touchActive = false;
         }
 
         // Hide all but the default menu
@@ -258,6 +259,11 @@ public class PhysicsInputManager : MonoBehaviour {
     }
 
     public void EnableTouch() {
-        _touchActive = true;
+        if (safeZone == null) {
+            Debug.LogWarning("Arm operation requires the safe-zone to be specified");
+        }
+        else {
+            _touchActive = true;
+        }
     }
 }

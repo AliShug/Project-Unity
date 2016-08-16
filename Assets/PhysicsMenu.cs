@@ -93,22 +93,27 @@ public class PhysicsMenu : MonoBehaviour {
         _switchTimer = WaitAndSwitch(0.3f, menu);
         StartCoroutine(_switchTimer);
 
-        RecordingManager.Instance.Log(string.Format(
+        RecordingManager.Log(string.Format(
             "EVENT: menu_transition from=<{0}> to=<{1}>",
             name, menu.name));
     }
 
     private void ApplySettings() {
-        InfoText textComp = GetComponent<InfoText>();
-        if (textComp != null) {
-            TactisDemo.Instance.infoText.text = textComp.text;
+        // Demo-specific stuff
+        var demo = TactisDemo.Instance;
+        if (demo != null) {
+            InfoText textComp = GetComponent<InfoText>();
+            if (textComp != null) {
+                TactisDemo.Instance.infoText.text = textComp.text;
+            }
+
+            Animator infoAnim = TactisDemo.Instance.infoAnim;
+            infoAnim.SetBool("show_intro", showIntroScreen);
+            infoAnim.SetBool("end", showEndScreen);
+            infoAnim.SetBool("show_pane", textComp != null);
         }
 
-        Animator infoAnim = TactisDemo.Instance.infoAnim;
-        infoAnim.SetBool("show_intro", showIntroScreen);
-        infoAnim.SetBool("end", showEndScreen);
-        infoAnim.SetBool("show_pane", textComp != null);
-
+        // General
         if (touchEnabled) {
             GetComponentInParent<PhysicsInputManager>().EnableTouch();
         }

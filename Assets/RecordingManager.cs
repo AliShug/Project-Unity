@@ -308,12 +308,17 @@ public class RecordingManager : MonoBehaviour {
     }
 
     // Enable logging of arbitrary information
-    public void Log(string str) {
-        if (mode == Mode.Record) {
-            Debug.LogFormat("<recorded> {0}", str);
-            _messages.Enqueue(str);
+    public static void Log(string str) {
+        RecordingManager instance = Instance;
+
+        if (instance == null) {
+            Debug.LogFormat("<no recorder> {0}", str);
         }
-        else if (mode == Mode.Off) {
+        else if (instance.mode == Mode.Record) {
+            Debug.LogFormat("<recorded> {0}", str);
+            instance._messages.Enqueue(str);
+        }
+        else if (instance.mode == Mode.Off) {
             Debug.LogFormat("<recording off> {0}", str);
         }
     }
