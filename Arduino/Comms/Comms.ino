@@ -53,8 +53,9 @@ void setup() {
 
         if (servo.getID(err), err == DX1MOTOR_ERR_OK) {
             x1Servos[nx1++] = servo;
-            servo.setCWLimit(0.0f);
+            /*servo.setCWLimit(0.0f);
             servo.setCCWLimit(300.0f);
+            delay(10);*/
         }
     }
     for (int checkid = 0; checkid < 252; checkid++) {

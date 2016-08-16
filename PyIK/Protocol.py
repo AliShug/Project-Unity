@@ -284,7 +284,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getModelNumber <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getModelNumber <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -305,7 +305,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getFirmwareVersion <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getFirmwareVersion <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -326,7 +326,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getID <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getID <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -347,7 +347,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getReturnDelay <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getReturnDelay <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -368,7 +368,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getMaxTorque <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getMaxTorque <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
@@ -389,7 +389,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getTorqueEnable <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getTorqueEnable <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -410,7 +410,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getLED <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getLED <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -431,7 +431,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getVoltage <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getVoltage <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
@@ -452,7 +452,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getPosition <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getPosition <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
@@ -473,7 +473,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getLoad <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getLoad <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
@@ -494,7 +494,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getTemperature <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getTemperature <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -515,7 +515,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getSpeed <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getSpeed <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
@@ -536,7 +536,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getGoalPosition <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getGoalPosition <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
@@ -557,7 +557,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getGoalSpeed <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getGoalSpeed <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
@@ -578,7 +578,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getTorqueLimit <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getTorqueLimit <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('f', arg)[0]
@@ -599,7 +599,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getCWMargin <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getCWMargin <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -620,7 +620,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getCCWMargin <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getCCWMargin <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -641,7 +641,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getCWSlope <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getCWSlope <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]
@@ -662,7 +662,7 @@ class Servo:
         try:
             arg = tryRead(self.serial, 1)
             if arg != 'k':
-                print ('Servo Error in getCCWSlope <dx{0}:{1}> {2}'.format(self.protocol, self.id, self.serial.readline()))
+                print ('Servo Error in getCCWSlope <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
             val = struct.unpack('i', arg)[0]

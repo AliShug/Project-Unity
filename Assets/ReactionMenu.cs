@@ -41,7 +41,7 @@ public class ReactionMenu : PhysicsMenu {
     public void Awake() {
         // Pick our interaction mode and remove it from the available list
         _interactionMode = availableModes[Random.Range(0, availableModes.Count)];
-        Debug.LogFormat("{0} picked interaction mode {1}", this, _interactionMode);
+        RecordingManager.Instance.Log(string.Format("{0} picked interaction mode {1}", this, _interactionMode));
         availableModes.Remove(_interactionMode);
     }
 

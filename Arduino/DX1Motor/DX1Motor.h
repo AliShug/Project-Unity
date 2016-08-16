@@ -1,5 +1,5 @@
 /* Do not modify - auto-generated header file
- * Produced by jinjagen.py
+ * Produced by F:\Documents\GitHub\Project-Unity\Arduino\jinjagen.py
 
  * DESCRIPTION
  * Interface between an arduino microcontroller and AX12x Dynamixel servo
@@ -45,6 +45,7 @@
 #define DX1MOTOR_ERR_BAD_CHECKSUM 64
 #define DX1MOTOR_ERR_OVERLOAD 128
 #define DX1MOTOR_ERR_INSTRUCTION 256
+#define DX1MOTOR_ERR_CORRUPTION -1
 
 class DX1Motor {
 private:

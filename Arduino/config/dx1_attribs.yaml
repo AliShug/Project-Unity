@@ -89,6 +89,8 @@ defines:
     - ERR_OVERLOAD 128
     - ERR_INSTRUCTION 256
 
+    - ERR_CORRUPTION -1
+
 attribs:
   - name: ModelNumber
     adr: 0

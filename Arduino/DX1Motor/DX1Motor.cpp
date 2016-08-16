@@ -1,5 +1,5 @@
 /* Do not modify - auto-generated code file
- * Produced by jinjagen.py
+ * Produced by F:\Documents\GitHub\Project-Unity\Arduino\jinjagen.py
 
  * DESCRIPTION
  * Interface between an arduino microcontroller and AX12x Dynamixel servo
@@ -202,10 +202,14 @@ int DX1Motor::doReceive() {
     bool foundHeader = false;
     unsigned short len = 256;
 
+    unsigned char debug_buffer[256];
+    int debug_ind = 0;
+
     // Pattern-matching header with timeout
     // Breaks immediately when entire length has been read
     while (waitTimeout(DX1MOTOR_RX_TIMEOUT)) {
         unsigned char b = TemplateSerial.read();
+        debug_buffer[debug_ind++] = b;
 
         // Match the header
         if (match < 2) {
@@ -240,30 +244,39 @@ int DX1Motor::doReceive() {
         return DX1MOTOR_ERR_TIMEOUT;
     }
 
-    // Verify ID
+    // Corruptions (including of ID) should be caught by checksum
     int ind = 0;
     unsigned char responseID = block[ind++];
     if (responseID != _id) {
-        err |= DX1MOTOR_ERR_PROTOCOL;
+        /*Serial.print("RESPONSE ERROR: Unexpected ID ");
+        Serial.println(responseID, DEC);
+        Serial.print("Received ");
+        Serial.write(debug_buffer, debug_ind);
+        err |= DX1MOTOR_ERR_PROTOCOL;*/
     }
-    else {
-        ind++;
-        // Get remaining response length & wait for buffer to fill, if necessary
-        _responseParams = len - 2;
 
-        // Error flags
-        int responseError = block[ind++];
+    ind++;
+    // Get remaining response length & wait for buffer to fill, if necessary
+    _responseParams = len - 2;
 
-        // Parameters are stored up to the capacity limit
-        for (int i = 0; i < _responseParams; i++) {
-            unsigned char byte = block[ind++];
-            if (i < 16) {
-                _responseData[i] = byte;
-            }
+    // Error flags
+    responseError = block[ind++];
+
+    // Parameters are stored up to the capacity limit
+    for (int i = 0; i < _responseParams; i++) {
+        unsigned char byte = block[ind++];
+        if (i < 16) {
+            _responseData[i] = byte;
         }
-
-        // TODO: Checksum
     }
+
+    // Verify the checksum (misses header)
+    unsigned char received_chk = block[ind];
+    if (received_chk != computeChecksum(block, ind)) {
+        //Serial.println("Corruption");
+        return DX1MOTOR_ERR_CORRUPTION;
+    }
+
 
     // Check the status-error flags
     if (responseError != 0) {
@@ -295,35 +308,49 @@ int DX1Motor::doReceive() {
 }
 
 int DX1Motor::read(unsigned char adr, unsigned char len, unsigned char *data) {
-    unsigned char b[2];
-    startPacket(DX1MOTOR_READ_DATA);
-    b[0] = adr;
-    b[1] = len;
-    bufferParams(b, 2);
-    sendPacket();
+    while (true) {
+        unsigned char b[2];
+        startPacket(DX1MOTOR_READ_DATA);
+        b[0] = adr;
+        b[1] = len;
+        bufferParams(b, 2);
+        sendPacket();
 
-    // Get the response
-    int err = 0;
-    err = doReceive();
+        // Get the response
+        int err = 0;
+        err = doReceive();
 
-    if (!(err & DX1MOTOR_ERR_TIMEOUT) && _responseParams == len) {
-        for (int i = 0; i < len; i++) {
-            data[i] = _responseData[i];
+        if (err == DX1MOTOR_ERR_CORRUPTION) {
+            // Packet got corrupted, try again
+            continue;
         }
-    }
 
-    return err;
+        if (!(err & DX1MOTOR_ERR_TIMEOUT) && _responseParams == len) {
+            for (int i = 0; i < len; i++) {
+                data[i] = _responseData[i];
+            }
+        }
+
+        return err;
+    }
 }
 
 int DX1Motor::write(unsigned char adr, unsigned char len, unsigned char *data) {
-    unsigned char b[1];
-    startPacket(DX1MOTOR_WRITE_DATA);
-    b[0] = adr;
-    bufferParams(b, 1);
-    bufferParams(data, len);
-    sendPacket();
+    while (true) {
+        unsigned char b[1];
+        startPacket(DX1MOTOR_WRITE_DATA);
+        b[0] = adr;
+        bufferParams(b, 1);
+        bufferParams(data, len);
+        sendPacket();
 
-    return doReceive();
+        int err = doReceive();
+        if (err == DX1MOTOR_ERR_CORRUPTION) {
+            // Packet got corrupted, try again
+            continue;
+        }
+        return doReceive();
+    }
 }//// END INCLUDE
 
 int DX1Motor::getModelNumber(int &err) {

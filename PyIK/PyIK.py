@@ -229,8 +229,8 @@ class Kinectics:
                 self.curGoal = np.array(newGoal)
             except socket.error as err:
                 print ("Socket error: {0}".format(err))
-        sensor = struct.pack('i', 0)
-        #sensor = struct.pack('i', self.capSense.read(1)[0])
+        #sensor = struct.pack('i', 0)
+        sensor = struct.pack('i', self.capSense.read(1)[0])
         realPose = self.arm.getRealPose()
         if realPose is not None:
             self.sockOut.send(realPose.serialize() + sensor)
@@ -352,7 +352,6 @@ class Kinectics:
         pyg.display.flip()
 
         self.tickComms()
-        #print(self.capSense.read(1))
 
     def displayServoPositions(self, col, pos):
         i = 0
