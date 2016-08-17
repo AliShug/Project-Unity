@@ -4,11 +4,73 @@ from __future__ import print_function
 
 import struct
 import time
+import serial as pyserial
 
 waitTime = 0.01
 
 class TimeoutException(Exception):
     pass
+
+class ArduinoConfigException(Exception):
+    pass
+
+# Connection and utility functions
+def serialConnect(port, baud):
+    """Creates, checks and returns a serial connection to a configured Arduino
+    """
+    serial = pyserial.Serial(port, baud)
+    print ("Waiting for board on {0}".format(port), end=" ")
+    serial.timeout = 5
+    result = ''
+    attempts = 1
+    while result == '':
+        print ("Attempt {0}".format(attempts))
+        serial.close()
+        serial.open()
+        result = serial.readline()
+        attempts += 1
+
+    if not result.startswith("CommTest READY"):
+        raise ArduinoConfigException("ERROR: PC/Board software mismatch", result)
+    return serial
+
+def findServos(serial):
+    """When passed a serial connection to a configured Arduino, returns all
+    connected servos.
+    """
+    servos = {'v1': [], 'v2': []}
+    # Retrieves a list of servos over serial, one per line
+    if serial is not None:
+        timer = time.clock()
+        # Set relatively high timeout for this section of board comms
+        serial.timeout = 3
+        command = "list"
+        l = struct.pack('b', len(command))
+        serial.write(l + command)
+        read = serial.readline()
+        x1num = int(read.split('=')[1])
+        for i in range(x1num):
+            str = serial.readline()
+            if str.startswith("ERROR"):
+                print ("Hardware Error during V1 servo listing: ", str)
+            else:
+                id = int(str)
+                servos['v1'].append(Servo(serial, 1, id))
+        read = serial.readline()
+        x2num = int(read.split('=')[1])
+        for i in range(x2num):
+            str = serial.readline()
+            if str.startswith("ERROR"):
+                print ("Hardware Error during V2 servo listing: ", str)
+            else:
+                id = int(str)
+                servos['v2'].append(Servo(serial, 2, id))
+        # Revert to shorter timeout
+        serial.timeout = 0.01
+    # Return our output servo dictionary
+    return servos
+
+
 
 def waitFor(serial, num_bytes, timeout=0.1):
     start = time.time()

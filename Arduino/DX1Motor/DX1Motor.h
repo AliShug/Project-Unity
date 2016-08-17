@@ -70,7 +70,7 @@ private:
     void startPacket(unsigned char instruction, bool broadcast = false);
     void bufferParams(unsigned char *data_block, unsigned short block_length);
     void sendPacket();
-    int doReceive();
+    int doReceive(int timeout);
 
 public:
     DX1Motor();

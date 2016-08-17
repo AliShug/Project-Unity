@@ -148,6 +148,9 @@ class ArmPose:
         # No valid positions X<=0
         if self.wrist2D[0] <= 0:
             return False
+        # Effector must be < 170mm high
+        if self.effector[1] > 170:
+            return False
         return True
 
     def checkClearance(self):
@@ -201,10 +204,12 @@ class ArmController:
             else:
                 # Initialise a PID controller for the servo
                 if servo.protocol == 1:
+                    servo.setGoalSpeed(-MOTORSPEED)
                     servo.data['pid'] = pid.PIDControl(2.4, 0, 0.4)
+                else:
+                    servo.setGoalSpeed(0)
                 servo.data['error'] = 0.0
                 # Make sure the goal speed is set
-                servo.setGoalSpeed(-MOTORSPEED)
                 servo.setTorqueEnable(1)
                 if servo.protocol == 1:
                     print("Setting slope")
@@ -274,6 +279,12 @@ class ArmController:
                 newPos = servo.getPosition()
                 if type(newPos) is float:
                     servo.data['pos'] = newPos
+
+    def clearPositionError(self):
+        """Clears the servo's position-error accumulators"""
+        for servo in self.servos.itervalues():
+            if servo is not None and servo.protocol == 1:
+                servo.data['error'] = 0.0
 
     def getRealPose(self):
         """Retrieve the real-world arm pose, or None if not all servos are

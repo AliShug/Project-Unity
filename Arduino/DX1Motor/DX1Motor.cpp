@@ -178,17 +178,17 @@ void DX1Motor::sendPacket() {
     // }
     // Ensure output completed before we switch comm modes
     TemplateSerial.flush();
+    // Clear junk bytes
+    //while (TemplateSerial.available())
+    //    TemplateSerial.read();
     digitalWrite(CommPin, 0);
-    // Clear 'reflected' bytes
-    while (TemplateSerial.available())
-        TemplateSerial.read();
 
     // Clear the packet buffer
     delete _packet_data;
     _packet_data = NULL;
 }
 
-int DX1Motor::doReceive() {
+int DX1Motor::doReceive(int timeout) {
     int err = 0; // return val
     int responseError = 0;
     _responseParams = 0;
@@ -207,7 +207,7 @@ int DX1Motor::doReceive() {
 
     // Pattern-matching header with timeout
     // Breaks immediately when entire length has been read
-    while (waitTimeout(DX1MOTOR_RX_TIMEOUT)) {
+    while (waitTimeout(timeout)) {
         unsigned char b = TemplateSerial.read();
         debug_buffer[debug_ind++] = b;
 
@@ -318,7 +318,7 @@ int DX1Motor::read(unsigned char adr, unsigned char len, unsigned char *data) {
 
         // Get the response
         int err = 0;
-        err = doReceive();
+        err = doReceive(DX1MOTOR_RX_TIMEOUT);
 
         if (err == DX1MOTOR_ERR_CORRUPTION) {
             // Packet got corrupted, try again
@@ -344,12 +344,12 @@ int DX1Motor::write(unsigned char adr, unsigned char len, unsigned char *data) {
         bufferParams(data, len);
         sendPacket();
 
-        int err = doReceive();
+        int err = doReceive(DX1MOTOR_RX_TIMEOUT);
         if (err == DX1MOTOR_ERR_CORRUPTION) {
             // Packet got corrupted, try again
             continue;
         }
-        return doReceive();
+        return err;
     }
 }//// END INCLUDE
 

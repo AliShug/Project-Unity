@@ -167,17 +167,17 @@ void {{cname}}::sendPacket() {
     // }
     // Ensure output completed before we switch comm modes
     TemplateSerial.flush();
+    // Clear junk bytes
+    //while (TemplateSerial.available())
+    //    TemplateSerial.read();
     digitalWrite(CommPin, 0);
-    // Clear 'reflected' bytes
-    while (TemplateSerial.available())
-        TemplateSerial.read();
 
     // Clear the packet buffer
     delete _packet_data;
     _packet_data = NULL;
 }
 
-int {{cname}}::doReceive() {
+int {{cname}}::doReceive(int timeout) {
     int err = 0; // return val
     int responseError = 0;
     _responseParams = 0;
@@ -196,7 +196,7 @@ int {{cname}}::doReceive() {
 
     // Pattern-matching header with timeout
     // Breaks immediately when entire length has been read
-    while (waitTimeout({{cname|upper}}_RX_TIMEOUT)) {
+    while (waitTimeout(timeout)) {
         unsigned char b = TemplateSerial.read();
         debug_buffer[debug_ind++] = b;
 
@@ -337,7 +337,7 @@ int {{cname}}::read(unsigned char adr, unsigned char len, unsigned char *data) {
 
         // Get the response
         int err = 0;
-        err = doReceive();
+        err = doReceive({{cname|upper}}_RX_TIMEOUT);
 
         if (err == {{cname|upper}}_ERR_CORRUPTION) {
             // Packet got corrupted, try again
@@ -363,11 +363,11 @@ int {{cname}}::write(unsigned char adr, unsigned char len, unsigned char *data) 
         bufferParams(data, len);
         sendPacket();
 
-        int err = doReceive();
+        int err = doReceive({{cname|upper}}_RX_TIMEOUT);
         if (err == {{cname|upper}}_ERR_CORRUPTION) {
             // Packet got corrupted, try again
             continue;
         }
-        return doReceive();
+        return err;
     }
 }

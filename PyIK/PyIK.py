@@ -11,7 +11,7 @@ import numpy as np
 import pygame as pyg
 
 from pid import PIDControl
-from Protocol import Servo, CapacitiveSensor
+import Protocol
 from solvers import IKSolver, PhysicalSolver
 import window
 import views
@@ -22,9 +22,9 @@ from util import *
 RECV_PORT = 14001
 TRAN_PORT = 14002
 
-MAX_SPEED = 40.0
-ACCEL = 1.7
-DECEL = 0.8
+MAX_SPEED = 800.0
+ACCEL = 1600.0
+DECEL = 2.2
 
 import pdb;
 
@@ -50,31 +50,7 @@ class Kinectics:
         if port is None:
             return None
         else:
-            comm = serial.Serial()
-            comm.baudrate = 250000
-            comm.port = port
-
-            print ("Waiting for board on {0}".format(port), end=" ")
-            comm.timeout = 5
-            result = ''
-            attempts = 1
-            while result == '':
-                print ("Attempt {0}".format(attempts))
-                comm.close()
-                comm.open()
-                result = comm.readline()
-                attempts += 1
-
-            if result.startswith("CommTest READY"):
-                print ("OK")
-            else:
-                print ("ERROR: PC/Board software mismatch")
-                print (result)
-                self.perflog.close()
-                sys.exit(0);
-            timer = time.clock()
-            self.perflog.write('connected {0}\n'.format(timer-self.time_start))
-            return comm
+            return Protocol.serialConnect("COM3", 250000)
 
     def findServos(self, comm):
         """Retrieves and processes the list of available (responsive) servos
@@ -89,45 +65,25 @@ class Kinectics:
             'wrist_y': None
         }
         # Mapping of IDs->functions
-        x1ids = {
+        v1_IDs = {
             0 : 'swing',
             1 : 'actuator',
             2 : 'shoulder'
         }
-        x2ids = {
+        v2_IDs = {
             1 : 'wrist_x',
             0 : 'wrist_y'
         }
-        # Retrieves a list of servos over serial, one per line
-        if comm is not None:
-            timer = time.clock()
-            # Set relatively high timeout for this section of board comms
-            comm.timeout = 3
-            command = "list"
-            l = struct.pack('b', len(command))
-            comm.write(l + command)
-            read = comm.readline()
-            print(">"+read)
-            x1num = int(read.split('=')[1])
-            for i in range(x1num):
-                str = comm.readline()
-                if str.startswith("ERROR"):
-                    print ("Hardware Error during X1 servo listing: ", str)
-                else:
-                    id = int(str)
-                    servos[x1ids[id]] = Servo(comm, 1, id)
-            read = comm.readline()
-            x2num = int(read.split('=')[1])
-            for i in range(x2num):
-                str = comm.readline()
-                if str.startswith("ERROR"):
-                    print ("Hardware Error during X2 servo listing: ", str)
-                else:
-                    id = int(str)
-                    servos[x2ids[id]] = Servo(comm, 2, id)
-            self.perflog.write('found_servos {0}\n'.format(time.clock()-timer))
-            # Revert to shorter timeout
-            comm.timeout = 0.01
+        # Servos retrieved from Arduino
+        found = Protocol.findServos(comm)
+        i = 0
+        for v1servo in found['v1']:
+            servos[v1_IDs[i]] = v1servo
+            i += 1
+        j = 0
+        for v2servo in found['v2']:
+            servos[v2_IDs[j]] = v2servo
+            j += 1
         # Return our output servo dictionary
         return servos
 
@@ -166,7 +122,7 @@ class Kinectics:
             arm_config = litearm.ArmConfig())
 
         # Capacitive sensor
-        self.capSense = CapacitiveSensor(comm)
+        self.capSense = Protocol.CapacitiveSensor(comm)
 
         self.sideView = views.PlaneView(width=10)
         self.realSideView = views.PlaneView(width=5, color=gray)
@@ -183,12 +139,13 @@ class Kinectics:
         else:
             self.curGoal = np.array([0., 50., 200.])
         self.ikTarget = np.array(self.curGoal)
+        self.lastValidGoal = np.array(self.curGoal)
         self.curDir = [0.0, 0.0]
         self.goalNormal = [0, 0, 1]
         self.ikOffset = np.array([0.,0.,0.])
 
         self.lerpSpeed = 0
-
+        self.lerpTimer = time.clock()
         self.lastPose = None
 
         # render the reachable area
@@ -229,8 +186,8 @@ class Kinectics:
                 self.curGoal = np.array(newGoal)
             except socket.error as err:
                 print ("Socket error: {0}".format(err))
-        #sensor = struct.pack('i', 0)
-        sensor = struct.pack('i', self.capSense.read(1)[0])
+        sensor = struct.pack('i', 0)
+        #sensor = struct.pack('i', self.capSense.read(1)[0])
         realPose = self.arm.getRealPose()
         if realPose is not None:
             self.sockOut.send(realPose.serialize() + sensor)
@@ -238,19 +195,27 @@ class Kinectics:
             self.sockOut.send(self.arm.getIKPose().serialize() + sensor)
 
     def lerpIKTarget(self):
-        #pdb.set_trace()
+        # Scales with time delta
+        now = time.clock()
+        dt = now - self.lerpTimer
+        self.lerpTimer = now
+
         delta = np.subtract(self.curGoal, self.ikTarget)
         dist = np.linalg.norm(delta)
-        if (dist < 0.001):
-            self.lerpSpeed = ACCEL*10
+        if (dist < 1):
+            self.lerpSpeed = ACCEL*0.1
             return
         else:
             # acceleration
-            self.lerpSpeed += ACCEL
+            self.lerpSpeed += ACCEL*dt
             curMax = MAX_SPEED*(0.03 + 0.97*min(1, 0.01*DECEL*dist))
             if self.lerpSpeed > curMax:
                 self.lerpSpeed = curMax
-            self.ikTarget = self.ikTarget + normalize(delta)*min(dist, self.lerpSpeed)
+            self.ikTarget = self.ikTarget + normalize(delta)*min(dist, dt*self.lerpSpeed)
+        # Disable motor error checks at high speeds
+        if self.lerpSpeed > 0.11*ACCEL:
+            self.arm.clearPositionError()
+
 
     def getGoalOffset(self):
         """3D Offset between measured position and goal position"""
@@ -342,6 +307,12 @@ class Kinectics:
             self.arm.tick()
             self.serial_time_accum += time.clock()-timer
             self.serial_time_counter += 1
+            # Update the last known valid goal
+            self.lastValidGoal = np.array(self.ikTarget)
+        else:
+            # Revert to last good goal position
+            self.curGoal = np.array(self.lastValidGoal)
+            self.ikTarget = np.array(self.lastValidGoal)
 
         # Update the views
         realPose = self.arm.getRealPose()
