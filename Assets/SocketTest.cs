@@ -125,6 +125,7 @@ public class SocketTest : MonoBehaviour
             wristX = BitConverter.ToSingle(rawData, 12) * Mathf.Rad2Deg;
             wristY = BitConverter.ToSingle(rawData, 16) * Mathf.Rad2Deg;
             _capacitiveSensor = BitConverter.ToInt32(rawData, 20);
+            print(CapacitiveSensor);
         }
 
         // Set the arm configuration

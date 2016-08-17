@@ -17,6 +17,8 @@ public class ReactionMenu : PhysicsMenu
     public UnityEvent onFirstShow;
     public UnityEvent onNext;
 
+    public bool randomizeInputMode = true;
+
     private int _displayCount = 0;
     private bool _hasShown = false;
 
@@ -47,10 +49,23 @@ public class ReactionMenu : PhysicsMenu
 
     public void Awake()
     {
-        // Pick our interaction mode and remove it from the available list
-        _interactionMode = availableModes[Random.Range(0, availableModes.Count)];
-        RecordingManager.Log(string.Format("{0} picked interaction mode {1}", this, _interactionMode));
-        availableModes.Remove(_interactionMode);
+        if (randomizeInputMode)
+        {
+            // Pick our interaction mode and remove it from the available list
+            _interactionMode = availableModes[Random.Range(0, availableModes.Count)];
+            RecordingManager.Log(string.Format("{0} picked interaction mode {1}", this, _interactionMode));
+            availableModes.Remove(_interactionMode);
+
+            // Enable our touch-response if we're using the touch mode
+            if (_interactionMode == PhysicsInput.Mode.StaticTouch)
+            {
+                touchEnabled = true;
+            }
+            else
+            {
+                touchEnabled = false;
+            }
+        }
     }
 
     protected override void OnShow()
@@ -60,10 +75,13 @@ public class ReactionMenu : PhysicsMenu
         if (!_hasShown)
         {
             // Setup buttons for interaction
-            var buttons = GetComponentsInChildren<PhysicsInput>(true);
-            foreach (var btn in buttons)
+            if (randomizeInputMode)
             {
-                btn.SetMode(_interactionMode);
+                var buttons = GetComponentsInChildren<PhysicsInput>(true);
+                foreach (var btn in buttons)
+                {
+                    btn.SetMode(_interactionMode);
+                }
             }
             onFirstShow.Invoke();
             _hasShown = true;

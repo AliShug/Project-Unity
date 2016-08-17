@@ -141,7 +141,7 @@ void Protocol::dispatchV1Command(Stream &s, int mode, char command, char id) {
                 s.println("ERROR: Bad command");
             return;
         }
-        s.flush();
+        //s.flush();
     }
     else if (mode == MODE_GET) {
         switch (command) {
@@ -244,7 +244,7 @@ void Protocol::dispatchV1Command(Stream &s, int mode, char command, char id) {
                 s.println("ERROR: Bad command");
             return;
         }
-        s.flush();
+        //s.flush();
     }
 }
 

@@ -16,6 +16,7 @@ from solvers import IKSolver, PhysicalSolver
 import window
 import views
 import litearm
+import capsense
 
 from util import *
 
@@ -24,7 +25,9 @@ TRAN_PORT = 14002
 
 MAX_SPEED = 800.0
 ACCEL = 1600.0
-DECEL = 2.2
+DECEL = 1.0
+
+CS_PORT = 'COM4'
 
 import pdb;
 
@@ -107,6 +110,7 @@ class Kinectics:
         comm = self.connectController()
         self.servos = self.findServos(comm)
 
+
         window.InitRenderer()
         self.r = window.Renderer(pyg.display.set_mode([1200, 600], pyg.DOUBLEBUF|pyg.HWSURFACE))
         pyg.display.set_caption("IK Control Test")
@@ -121,8 +125,8 @@ class Kinectics:
             # use the default config
             arm_config = litearm.ArmConfig())
 
-        # Capacitive sensor
-        self.capSense = Protocol.CapacitiveSensor(comm)
+        # Capacitive sensor on connected UNO
+        self.capSense = capsense.CapacitiveSensor('COM4')
 
         self.sideView = views.PlaneView(width=10)
         self.realSideView = views.PlaneView(width=5, color=gray)
@@ -186,8 +190,9 @@ class Kinectics:
                 self.curGoal = np.array(newGoal)
             except socket.error as err:
                 print ("Socket error: {0}".format(err))
-        sensor = struct.pack('i', 0)
-        #sensor = struct.pack('i', self.capSense.read(1)[0])
+        #sensor = struct.pack('i', 0)
+        self.capSense.updateReadings()
+        sensor = struct.pack('i', int(self.capSense.latest()))
         realPose = self.arm.getRealPose()
         if realPose is not None:
             self.sockOut.send(realPose.serialize() + sensor)
@@ -203,7 +208,7 @@ class Kinectics:
         delta = np.subtract(self.curGoal, self.ikTarget)
         dist = np.linalg.norm(delta)
         if (dist < 1):
-            self.lerpSpeed = ACCEL*0.1
+            self.lerpSpeed = ACCEL*0.03
             return
         else:
             # acceleration

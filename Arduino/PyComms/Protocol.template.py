@@ -8,6 +8,9 @@ import serial as pyserial
 
 waitTime = 0.01
 
+# Buffering system for bulk command issue
+buffering = False
+
 class TimeoutException(Exception):
     pass
 

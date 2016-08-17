@@ -344,12 +344,14 @@ int DX1Motor::write(unsigned char adr, unsigned char len, unsigned char *data) {
         bufferParams(data, len);
         sendPacket();
 
-        int err = doReceive(DX1MOTOR_RX_TIMEOUT);
+        // Low return level
+        return 0;
+        /*int err = doReceive(DX1MOTOR_RX_TIMEOUT);
         if (err == DX1MOTOR_ERR_CORRUPTION) {
             // Packet got corrupted, try again
             continue;
         }
-        return err;
+        return err;*/
     }
 }//// END INCLUDE
 

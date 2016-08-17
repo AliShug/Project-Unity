@@ -363,11 +363,13 @@ int {{cname}}::write(unsigned char adr, unsigned char len, unsigned char *data) 
         bufferParams(data, len);
         sendPacket();
 
-        int err = doReceive({{cname|upper}}_RX_TIMEOUT);
+        // Low return level
+        return 0;
+        /*int err = doReceive({{cname|upper}}_RX_TIMEOUT);
         if (err == {{cname|upper}}_ERR_CORRUPTION) {
             // Packet got corrupted, try again
             continue;
         }
-        return err;
+        return err;*/
     }
 }

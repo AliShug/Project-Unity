@@ -72,6 +72,7 @@ void setup() {
 
     // Low latency
     for (int i = 0; i < nx1; i++) {
+        x1Servos[i].setReturnLevel(1);
         x1Servos[i].setReturnDelay(0);
     }
     for (int i = 0; i < nx2; i++) {

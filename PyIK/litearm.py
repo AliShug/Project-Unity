@@ -148,8 +148,8 @@ class ArmPose:
         # No valid positions X<=0
         if self.wrist2D[0] <= 0:
             return False
-        # Effector must be < 170mm high
-        if self.effector[1] > 170:
+        # Effector must be < 180mm high
+        if self.effector[1] > 180:
             return False
         return True
 
