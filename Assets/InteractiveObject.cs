@@ -54,6 +54,18 @@ public class InteractiveObject : MonoBehaviour
         OnMove();
     }
 
+    public void Rotate(Quaternion newRotation)
+    {
+        transform.rotation = newRotation;
+        OnMove();
+    }
+
+    public void RotateLocal(Quaternion newRotation)
+    {
+        transform.localRotation = newRotation;
+        OnMove();
+    }
+
     protected virtual void OnMove() { return; }
 
     public void PhysicsReset()

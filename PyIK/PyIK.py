@@ -49,11 +49,11 @@ class Kinectics:
             return None
 
     def connectController(self):
-        port = self.findSerial()
-        if port is None or port is not 'COM3':
-            return None
-        else:
+        port = 'COM3'
+        try:
             return Protocol.serialConnect(port, 250000)
+        except:
+            return None
 
     def findServos(self, comm):
         """Retrieves and processes the list of available (responsive) servos

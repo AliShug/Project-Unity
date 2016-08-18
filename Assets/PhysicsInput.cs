@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class PhysicsInput : InteractiveObject
 {
 
-    public static int clickThreshold = 5500;
+    public static int clickThreshold = 2100;
 
     public enum Mode
     {

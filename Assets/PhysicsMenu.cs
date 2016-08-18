@@ -46,7 +46,7 @@ public class PhysicsMenu : MonoBehaviour
 
     public IEnumerator WaitAndSwitch(float time, PhysicsMenu menu)
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.25f);
         Hide();
         yield return new WaitForSeconds(time);
         GetComponentInParent<PhysicsInputManager>().CurrentMenu = menu;
@@ -109,7 +109,7 @@ public class PhysicsMenu : MonoBehaviour
 
     public void SwitchTo(PhysicsMenu menu)
     {
-        _switchTimer = WaitAndSwitch(0.3f, menu);
+        _switchTimer = WaitAndSwitch(1.0f, menu);
         StartCoroutine(_switchTimer);
 
         RecordingManager.Log(string.Format(

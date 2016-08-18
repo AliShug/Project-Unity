@@ -12,7 +12,7 @@ public class ReactionMenu : PhysicsMenu
     };
 
     public int displayIterations = 10;
-    public Vector2 placementLimits = new Vector2(0.2f, 0.15f);
+    public Vector2 placementLimits = new Vector2(0.18f, 0.1f);
 
     public UnityEvent onFirstShow;
     public UnityEvent onNext;
@@ -111,7 +111,7 @@ public class ReactionMenu : PhysicsMenu
         {
             Vector3 newPos = new Vector3();
             float dist = 0.0f;
-            while (dist < 0.08f)
+            while (dist < 0.1f)
             {
                 newPos.x = Random.Range(-0.2f, 0.2f);
                 newPos.y = Random.Range(-0.2f, 0.2f);
@@ -136,6 +136,12 @@ public class ReactionMenu : PhysicsMenu
             }
             usedPositions.Add(newPos);
             btn.MoveLocal(newPos);
+            var rot = btn.transform.localRotation;
+            var euler = rot.eulerAngles;
+            euler.x = Random.Range(-40.0f, 5.0f);
+            euler.y = Random.Range(-30.0f, 30.0f);
+            rot = Quaternion.Euler(euler);
+            btn.RotateLocal(rot);
             // Force the physics joint to reset
             btn.gameObject.SetActive(false);
             btn.gameObject.SetActive(true);

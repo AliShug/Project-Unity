@@ -187,7 +187,14 @@ public class RecordingManager : MonoBehaviour
             }
             else
             {
-                _recordingFilePath = string.Format("{0}{1}.unityrec", rootFolder, recordingFile);
+                // Uniquely names the file
+                int n = 0;
+                string suffix = "";
+                do
+                {
+                    _recordingFilePath = string.Format("{0}{1}{2}.unityrec", rootFolder, recordingFile, suffix);
+                    suffix = string.Format("_{0}", n++);
+                } while (File.Exists(_recordingFilePath));
             }
             _recording = new RecordingData();
             _recording.interval = frameInterval;
