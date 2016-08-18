@@ -17,6 +17,7 @@ import window
 import views
 import litearm
 import capsense
+import armvolume
 
 from util import *
 
@@ -129,12 +130,9 @@ class Kinectics:
         self.capSense = capsense.CapacitiveSensor('COM4')
 
         self.sideView = views.PlaneView(width=10)
-        self.realSideView = views.PlaneView(width=5, color=gray)
+        self.realSideView = views.PlaneView(width=5, color=gray, positioning='offset')
         self.topView = views.TopView(width=12)
-        self.realTopView = views.TopView(width=6, color=gray)
-
-        self.armAngle = 0
-        self.pid = PIDControl(0.2, 0, 0)
+        self.realTopView = views.TopView(width=6, color=gray, positioning='offset')
 
         self.arm.pollServos()
         realPose = self.arm.getRealPose()
@@ -153,7 +151,8 @@ class Kinectics:
         self.lastPose = None
 
         # render the reachable area
-        self.sideView.renderReachableVolume(self.arm)
+        self.reachableVolume = armvolume.ArmVolume(self.arm)
+        self.sideView.renderReachableVolume(self.reachableVolume)
 
     def stop(self):
         self.perflog.write('ik_avg {0}\n'.format(self.ik_time_accum/self.ik_time_counter))
@@ -269,14 +268,9 @@ class Kinectics:
         # Clear the render canvas
         self.r.surf.fill(white)
 
-        # Simulated arm swing - PID test
-        self.armAngle -= 0.01 * self.pid.stepOutput(self.armAngle)
-
         # Lerp towards target
         self.lerpIKTarget()
-        # Find offset of real position from goal position
-        if (self.arm.getRealPose() is not None):
-            self.ikOffset = self.ikOffset*0.9 + self.getGoalOffset()*0.1
+
         # IK - calculate swing and elbow pos using goal pos
         timer = time.clock()
         self.arm.setWristGoalPosition(self.ikTarget)
@@ -285,18 +279,6 @@ class Kinectics:
         self.ik_time_counter += 1
 
         pose = self.arm.getIKPose()
-        self.pid.setTarget(degrees(pose.swing_angle))
-
-        # Incorporate wrist orientation to pose
-        # wrist_x, wrist_y = self.wristFromNormal(self.goalNormal)
-        # pose.servo_wrist_x = wrist_x;
-        # pose.servo_wrist_y = wrist_y;
-
-        # Draw the PID test
-        armVec = rotate(vertical, radians(self.armAngle)) * 35
-        self.r.drawLine(views.pt_r([0, 0]), views.pt_r(armVec), black)
-        text = "Actual {d:.3f} deg".format(d = self.armAngle)
-        self.r.drawText(text, gray, [600, 60])
 
         # Find the current servo positions
         self.arm.pollServos()
@@ -347,6 +329,16 @@ class Kinectics:
 
     def drawViews(self, pose):
         timer = time.clock()
+
+        # Find the reachable arc for this height
+        arc = self.reachableVolume.getRadii(pose.effector[1])
+        if arc[1] is not None:
+            self.topView.setReachableArc(int(arc[0]), int(arc[1]))
+        else:
+            self.topView.setReachableArc(0, 0)
+
+        self.sideView.drawBack(pose, self.r)
+        self.topView.drawBack(pose, self.r)
         self.sideView.draw(pose, self.r)
         self.topView.draw(pose, self.r)
         # Display critical pose angles

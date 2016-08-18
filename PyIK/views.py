@@ -31,6 +31,8 @@ def getActuatorVerticalOffset(val):
 # def getActuatorFromVerticalOffset(val):
 #     return val + 150 + 54.78
 
+VOLUME_COL = [210,255,210]
+
 class PlaneView:
     def __init__(self, color=blue, width=6, positioning='normal'):
         self.color = color
@@ -40,41 +42,30 @@ class PlaneView:
         self.reachableXOffset = 90
         self.positioning = positioning
 
-    def renderReachableVolume(self, arm, res=50):
-        offset = self.reachableXOffset
-        size = (430-offset, self.backSize)
+    def renderReachableVolume(self, volume):
+        self.reachableXOffset = volume.offset
+        res = volume.res
         renderSurface = pyg.Surface((res, res))
 
-        y_step = size[1]/float(res)
-        x_step = size[0]/float(res)
+        y_step = volume.size[1]/float(res)
+        x_step = volume.size[0]/float(res)
         for y in xrange(res):
             for x in xrange(res):
-                pos = [0, (y-res/2)*y_step, offset + x*x_step]
-                arm.setWristGoalPosition(pos)
-                if arm.ik.valid:
-                    pose = arm.getIKPose()
-                    if pose is not None:
-                        test = pose.checkClearance()
-                    else:
-                        test = False
-                else:
-                    test = False
-
-                if test:
+                if volume.samples[x, y]:
                     # reachable pixel
-                    renderSurface.set_at((x,res-y-1), [210,255,210])
+                    renderSurface.set_at((x,res-y-1), VOLUME_COL)
                 else:
                     # unreachable
                     renderSurface.set_at((x,res-y-1), white)
         # scale to true size
-        self.backSurface = pyg.transform.smoothscale(renderSurface, size)
+        self.backSurface = pyg.transform.smoothscale(renderSurface, volume.size)
 
-
-    def draw(self, pose, r):
+    def drawBack(self, pose, r):
         if self.backSurface is not None:
             # render the reachable area
             r.surf.blit(self.backSurface, pt_l([self.reachableXOffset,self.backSize/2]))
 
+    def draw(self, pose, r):
         # Y axis
         r.drawLine(pt_l([0,0]), pt_l([0,150]), green)
         r.drawText('y', green, pt_l([-10,170]))
@@ -131,77 +122,66 @@ class PlaneView:
         r.drawLine(pt_l(pose.effector2D), pt_l(pose.effector2D + wrist_vec), col)
 
         # show 2D effector position
-        r.drawText(prettyVec(pose.effector2D), col, pt_l(pose.effector2D + [15,0]))
-
-        # Real positions
-        # Rotations from vertical
-        # left_rot = getArmVerticalOffset(self.l_servo.data['pos'])
-        # right_rot = getActuatorVerticalOffset(self.r_servo.data['pos'])
-        # real_main = rotate(vertical, left_rot)
-        # real_actuator = rotate(vertical, right_rot)
-        # fore_angle = self.phys.solve_forearm(left_rot, right_rot)
-        # real_fore = rotate(real_main, fore_angle)
-
-        # armPt = self.ik.originpl + real_main*self.ik.len0
-        # r.drawLine(
-        #     pt_l(self.ik.originpl),
-        #     pt_l(armPt),
-        #     black
-        # )
-        # r.drawLine(
-        #     pt_l(self.ik.originpl),
-        #     pt_l(self.ik.originpl + real_actuator*65),
-        #     black
-        # )
-        # r.drawLine(
-        #     pt_l(armPt),
-        #     pt_l(armPt + real_fore*self.ik.len1),
-        #     black
-        # )
-
-        # Text readout
-        # text = "Elbow {0:.2f}, {1:.2f}".format(
-        #     self.ik.elbow[0],
-        #     self.ik.elbow[1]
-        # )
-        # r.drawText(text, gray, [50, 20])
+        if self.positioning == 'normal':
+            offset = [15,0]
+        else:
+            offset = [15,20]
+        r.drawText(prettyVec(pose.effector2D), col, pt_l(pose.effector2D + offset))
 
         # Angles
+        if self.positioning == 'normal':
+            x = 50
+        else:
+            x = 200
         vert_angle = degrees(pose.shoulder_angle)
         text = "Main arm {0:.2f} deg".format(vert_angle)
-        r.drawText(text, black, [50, 40])
+        r.drawText(text, black, [x, 40])
 
         fore_angle = degrees(pose.elbow_angle)
         text = "Fore arm {0:.2f} deg".format(fore_angle)
-        r.drawText(text, black, [50, 60])
+        r.drawText(text, black, [x, 60])
 
 class TopView:
     def __init__(self, color=blue, width=6, positioning='normal'):
         self.color = color
         self.line_width = width
         self.positioning = positioning
+        self.reachableMin = 120
+        self.reachableMax = 250
+
+    def setReachableArc(self, min, max):
+        self.reachableMin = min
+        self.reachableMax = max
+
+    def drawBack(self, pose, r):
+        # Reachable arc
+        r.drawArc(VOLUME_COL, pt_r([0,0]), self.reachableMax*2, 0, np.pi, self.reachableMax-self.reachableMin)
 
     def draw(self, pose, r):
-        # Z axis from top
-        r.drawLine(pt_r([0,0]), pt_r([0,150]), blue)
-        r.drawText('z', blue, pt_r([-10,170]))
-        # X axis from top
-        r.drawLine(pt_r([0,0]), pt_r([150,0]), red)
-        r.drawText('x', red, pt_r([150,0]))
+        if self.positioning == 'normal':
+            # Z axis from top
+            r.drawLine(pt_r([0,0]), pt_r([0,150]), blue)
+            r.drawText('z', blue, pt_r([-10,170]))
+            # X axis from top
+            r.drawLine(pt_r([0,0]), pt_r([150,0]), red)
+            r.drawText('x', red, pt_r([150,0]))
 
-        # Base
-        r.drawCircle(pt_r([0, 0]), 30, [230, 230, 230])
+            # Base
+            r.drawCircle(pt_r([0, 0]), 30, [230, 230, 230])
 
-        offset = 600
+        if self.positioning == 'normal':
+            offset = 600
+        else:
+            offset = 750
         swing = degrees(pose.swing_angle)
         text = "Swing {0:.2f} deg".format(swing)
-        r.drawText(text, black, [offset, 20])
+        r.drawText(text, self.color, [offset, 20])
 
         # Show radial dist
         plane_vec = pose.wrist2D - pose.shoulder2D
         radial = plane_vec[0]
         text = "Radial dist {0:.2f}".format(radial)
-        r.drawText(text, black, [offset, 40])
+        r.drawText(text, self.color, [offset, 40])
 
         col = self.color
         # if not self.ik.valid:
@@ -229,6 +209,10 @@ class TopView:
         r.drawLine(pt_r(effector), pt_r(effector + wrist_vec), col)
 
         # show top-down effector position
-        r.drawText(prettyVec(effector), col, pt_r(effector + [15,0]))
+        if self.positioning == 'normal':
+            offset = [15,0]
+        else:
+            offset = [15,20]
+        r.drawText(prettyVec(effector), col, pt_r(effector + offset))
 
         #r.drawArc(col, pt_r([0,0]), 60, 0, np.pi, 10)
