@@ -19,13 +19,46 @@ commands:
         can_set: True
 
     -   <<: *base
+        name: CWLimit
+        can_set: True
+        type: float
+    -   <<: *base
+        name: CCWLimit
+        can_set: True
+        type: float
+
+    -   <<: *base
+        name: TempLimit
+        can_set: True
+    -   <<: *base
+        name: LowVoltageLimit
+        can_set: True
+        type: float
+    -   <<: *base
+        name: HighVoltageLimit
+        can_set: True
+        type: float
+    -   <<: *base
+        name: MaxTorque
+        can_set: True
+        type: float
+    -   <<: *base
         name: MaxTorque
         can_set: True
         type: float
 
     -   <<: *base
+        name: AlarmFlags
+        can_set: True
+        2: False
+        
+    -   <<: *base
+        name: ShutdownFlags
+        can_set: True
+    -   <<: *base
         name: TorqueEnable
         can_set: True
+        type: bool
     -   <<: *base
         name: LED
         can_set: True
@@ -74,3 +107,11 @@ commands:
         name: CCWSlope
         2: False
         can_set: True
+    -   <<: *base
+        name: Punch
+        can_set: True
+        type: float
+
+    -   <<: *base
+        name: Moving
+        type: bool

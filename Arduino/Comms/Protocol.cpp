@@ -89,59 +89,104 @@ void Protocol::dispatchV1Command(Stream &s, int mode, char command, char id) {
             } break;
             case '\x04': {
                 float val = _argf;
-                err = _x1s[id].setMaxTorque(val);
+                err = _x1s[id].setCWLimit(val);
                 dx1FinaliseSet(s, err);
             } break;
             case '\x05': {
-                long val = _argi;
-                err = _x1s[id].setTorqueEnable(val);
+                float val = _argf;
+                err = _x1s[id].setCCWLimit(val);
                 dx1FinaliseSet(s, err);
             } break;
             case '\x06': {
                 long val = _argi;
-                err = _x1s[id].setLED(val);
+                err = _x1s[id].setTempLimit(val);
+                dx1FinaliseSet(s, err);
+            } break;
+            case '\x07': {
+                float val = _argf;
+                err = _x1s[id].setLowVoltageLimit(val);
+                dx1FinaliseSet(s, err);
+            } break;
+            case '\x08': {
+                float val = _argf;
+                err = _x1s[id].setHighVoltageLimit(val);
+                dx1FinaliseSet(s, err);
+            } break;
+            case '\x09': {
+                float val = _argf;
+                err = _x1s[id].setMaxTorque(val);
+                dx1FinaliseSet(s, err);
+            } break;
+            case '\x0A': {
+                float val = _argf;
+                err = _x1s[id].setMaxTorque(val);
+                dx1FinaliseSet(s, err);
+            } break;
+            case '\x0B': {
+                long val = _argi;
+                err = _x1s[id].setAlarmFlags(val);
                 dx1FinaliseSet(s, err);
             } break;
             case '\x0C': {
+                long val = _argi;
+                err = _x1s[id].setShutdownFlags(val);
+                dx1FinaliseSet(s, err);
+            } break;
+            case '\x0D': {
+                bool val = _argi;
+                err = _x1s[id].setTorqueEnable(val);
+                dx1FinaliseSet(s, err);
+            } break;
+            case '\x0E': {
+                long val = _argi;
+                err = _x1s[id].setLED(val);
+                dx1FinaliseSet(s, err);
+            } break;
+            case '\x14': {
                 float val = _argf;
                 err = _x1s[id].setGoalPosition(val);
                 dx1FinaliseSet(s, err);
             } break;
-            case '\x0D': {
+            case '\x15': {
                 float val = _argf;
                 err = _x1s[id].setGoalSpeed(val);
                 dx1FinaliseSet(s, err);
             } break;
-            case '\x0E': {
+            case '\x16': {
                 float val = _argf;
                 err = _x1s[id].setTorqueLimit(val);
                 dx1FinaliseSet(s, err);
             } break;
-            case '\x0F': {
+            case '\x17': {
                 long val = _argi;
                 err = _x1s[id].setCWMargin(val);
                 dx1FinaliseSet(s, err);
             } break;
-            case '\x10': {
+            case '\x18': {
                 long val = _argi;
                 err = _x1s[id].setCCWMargin(val);
                 dx1FinaliseSet(s, err);
             } break;
-            case '\x11': {
+            case '\x19': {
                 long val = _argi;
                 err = _x1s[id].setCWSlope(val);
                 dx1FinaliseSet(s, err);
             } break;
-            case '\x12': {
+            case '\x1A': {
                 long val = _argi;
                 err = _x1s[id].setCCWSlope(val);
+                dx1FinaliseSet(s, err);
+            } break;
+            case '\x1B': {
+                float val = _argf;
+                err = _x1s[id].setPunch(val);
                 dx1FinaliseSet(s, err);
             } break;
             default:
                 s.println("ERROR: Bad command");
             return;
         }
-        //s.flush();
+        s.flush();
     }
     else if (mode == MODE_GET) {
         switch (command) {
@@ -167,84 +212,134 @@ void Protocol::dispatchV1Command(Stream &s, int mode, char command, char id) {
             } break;
             case '\x04': {
                 float res;
-                res = _x1s[id].getMaxTorque(err);
+                res = _x1s[id].getCWLimit(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x05': {
-                long res;
-                res = _x1s[id].getTorqueEnable(err);
+                float res;
+                res = _x1s[id].getCCWLimit(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x06': {
                 long res;
-                res = _x1s[id].getLED(err);
+                res = _x1s[id].getTempLimit(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x07': {
                 float res;
-                res = _x1s[id].getVoltage(err);
+                res = _x1s[id].getLowVoltageLimit(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x08': {
                 float res;
-                res = _x1s[id].getPosition(err);
+                res = _x1s[id].getHighVoltageLimit(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x09': {
                 float res;
-                res = _x1s[id].getLoad(err);
+                res = _x1s[id].getMaxTorque(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x0A': {
-                long res;
-                res = _x1s[id].getTemperature(err);
+                float res;
+                res = _x1s[id].getMaxTorque(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x0B': {
-                float res;
-                res = _x1s[id].getSpeed(err);
+                long res;
+                res = _x1s[id].getAlarmFlags(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x0C': {
-                float res;
-                res = _x1s[id].getGoalPosition(err);
+                long res;
+                res = _x1s[id].getShutdownFlags(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x0D': {
-                float res;
-                res = _x1s[id].getGoalSpeed(err);
+                long res;
+                res = _x1s[id].getTorqueEnable(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x0E': {
-                float res;
-                res = _x1s[id].getTorqueLimit(err);
+                long res;
+                res = _x1s[id].getLED(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x0F': {
-                long res;
-                res = _x1s[id].getCWMargin(err);
+                float res;
+                res = _x1s[id].getVoltage(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x10': {
-                long res;
-                res = _x1s[id].getCCWMargin(err);
+                float res;
+                res = _x1s[id].getPosition(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x11': {
-                long res;
-                res = _x1s[id].getCWSlope(err);
+                float res;
+                res = _x1s[id].getLoad(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             case '\x12': {
                 long res;
+                res = _x1s[id].getTemperature(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x13': {
+                float res;
+                res = _x1s[id].getSpeed(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x14': {
+                float res;
+                res = _x1s[id].getGoalPosition(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x15': {
+                float res;
+                res = _x1s[id].getGoalSpeed(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x16': {
+                float res;
+                res = _x1s[id].getTorqueLimit(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x17': {
+                long res;
+                res = _x1s[id].getCWMargin(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x18': {
+                long res;
+                res = _x1s[id].getCCWMargin(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x19': {
+                long res;
+                res = _x1s[id].getCWSlope(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x1A': {
+                long res;
                 res = _x1s[id].getCCWSlope(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x1B': {
+                float res;
+                res = _x1s[id].getPunch(err);
+                dx1FinaliseGet(s, err, &res);
+            } break;
+            case '\x1C': {
+                long res;
+                res = _x1s[id].getMoving(err);
                 dx1FinaliseGet(s, err, &res);
             } break;
             default:
                 s.println("ERROR: Bad command");
             return;
         }
-        //s.flush();
+        s.flush();
     }
 }
 
@@ -267,32 +362,72 @@ void Protocol::dispatchV2Command(Stream &s, int mode, char command, char id) {
             } break;
             case '\x04': {
                 float val = _argf;
-                err = _x2s[id].setMaxTorque(val);
+                err = _x2s[id].setCWLimit(val);
                 dx2FinaliseSet(s, err);
             } break;
             case '\x05': {
-                long val = _argi;
-                err = _x2s[id].setTorqueEnable(val);
+                float val = _argf;
+                err = _x2s[id].setCCWLimit(val);
                 dx2FinaliseSet(s, err);
             } break;
             case '\x06': {
                 long val = _argi;
-                err = _x2s[id].setLED(val);
+                err = _x2s[id].setTempLimit(val);
+                dx2FinaliseSet(s, err);
+            } break;
+            case '\x07': {
+                float val = _argf;
+                err = _x2s[id].setLowVoltageLimit(val);
+                dx2FinaliseSet(s, err);
+            } break;
+            case '\x08': {
+                float val = _argf;
+                err = _x2s[id].setHighVoltageLimit(val);
+                dx2FinaliseSet(s, err);
+            } break;
+            case '\x09': {
+                float val = _argf;
+                err = _x2s[id].setMaxTorque(val);
+                dx2FinaliseSet(s, err);
+            } break;
+            case '\x0A': {
+                float val = _argf;
+                err = _x2s[id].setMaxTorque(val);
                 dx2FinaliseSet(s, err);
             } break;
             case '\x0C': {
+                long val = _argi;
+                err = _x2s[id].setShutdownFlags(val);
+                dx2FinaliseSet(s, err);
+            } break;
+            case '\x0D': {
+                bool val = _argi;
+                err = _x2s[id].setTorqueEnable(val);
+                dx2FinaliseSet(s, err);
+            } break;
+            case '\x0E': {
+                long val = _argi;
+                err = _x2s[id].setLED(val);
+                dx2FinaliseSet(s, err);
+            } break;
+            case '\x14': {
                 float val = _argf;
                 err = _x2s[id].setGoalPosition(val);
                 dx2FinaliseSet(s, err);
             } break;
-            case '\x0D': {
+            case '\x15': {
                 float val = _argf;
                 err = _x2s[id].setGoalSpeed(val);
                 dx2FinaliseSet(s, err);
             } break;
-            case '\x0E': {
+            case '\x16': {
                 float val = _argf;
                 err = _x2s[id].setTorqueLimit(val);
+                dx2FinaliseSet(s, err);
+            } break;
+            case '\x1B': {
+                float val = _argf;
+                err = _x2s[id].setPunch(val);
                 dx2FinaliseSet(s, err);
             } break;
             default:
@@ -325,57 +460,102 @@ void Protocol::dispatchV2Command(Stream &s, int mode, char command, char id) {
             } break;
             case '\x04': {
                 float res;
-                res = _x2s[id].getMaxTorque(err);
+                res = _x2s[id].getCWLimit(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
             case '\x05': {
-                long res;
-                res = _x2s[id].getTorqueEnable(err);
+                float res;
+                res = _x2s[id].getCCWLimit(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
             case '\x06': {
                 long res;
-                res = _x2s[id].getLED(err);
+                res = _x2s[id].getTempLimit(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
             case '\x07': {
                 float res;
-                res = _x2s[id].getVoltage(err);
+                res = _x2s[id].getLowVoltageLimit(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
             case '\x08': {
                 float res;
-                res = _x2s[id].getPosition(err);
+                res = _x2s[id].getHighVoltageLimit(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
             case '\x09': {
                 float res;
-                res = _x2s[id].getLoad(err);
+                res = _x2s[id].getMaxTorque(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
             case '\x0A': {
+                float res;
+                res = _x2s[id].getMaxTorque(err);
+                dx2FinaliseGet(s, err, &res);
+            } break;
+            case '\x0C': {
+                long res;
+                res = _x2s[id].getShutdownFlags(err);
+                dx2FinaliseGet(s, err, &res);
+            } break;
+            case '\x0D': {
+                long res;
+                res = _x2s[id].getTorqueEnable(err);
+                dx2FinaliseGet(s, err, &res);
+            } break;
+            case '\x0E': {
+                long res;
+                res = _x2s[id].getLED(err);
+                dx2FinaliseGet(s, err, &res);
+            } break;
+            case '\x0F': {
+                float res;
+                res = _x2s[id].getVoltage(err);
+                dx2FinaliseGet(s, err, &res);
+            } break;
+            case '\x10': {
+                float res;
+                res = _x2s[id].getPosition(err);
+                dx2FinaliseGet(s, err, &res);
+            } break;
+            case '\x11': {
+                float res;
+                res = _x2s[id].getLoad(err);
+                dx2FinaliseGet(s, err, &res);
+            } break;
+            case '\x12': {
                 long res;
                 res = _x2s[id].getTemperature(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
-            case '\x0B': {
+            case '\x13': {
                 float res;
                 res = _x2s[id].getSpeed(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
-            case '\x0C': {
+            case '\x14': {
                 float res;
                 res = _x2s[id].getGoalPosition(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
-            case '\x0D': {
+            case '\x15': {
                 float res;
                 res = _x2s[id].getGoalSpeed(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
-            case '\x0E': {
+            case '\x16': {
                 float res;
                 res = _x2s[id].getTorqueLimit(err);
+                dx2FinaliseGet(s, err, &res);
+            } break;
+            case '\x1B': {
+                float res;
+                res = _x2s[id].getPunch(err);
+                dx2FinaliseGet(s, err, &res);
+            } break;
+            case '\x1C': {
+                long res;
+                res = _x2s[id].getMoving(err);
                 dx2FinaliseGet(s, err, &res);
             } break;
             default:

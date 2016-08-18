@@ -50,10 +50,10 @@ class Kinectics:
 
     def connectController(self):
         port = self.findSerial()
-        if port is None:
+        if port is None or port is not 'COM3':
             return None
         else:
-            return Protocol.serialConnect("COM3", 250000)
+            return Protocol.serialConnect(port, 250000)
 
     def findServos(self, comm):
         """Retrieves and processes the list of available (responsive) servos
@@ -192,7 +192,11 @@ class Kinectics:
                 print ("Socket error: {0}".format(err))
         #sensor = struct.pack('i', 0)
         self.capSense.updateReadings()
-        sensor = struct.pack('i', int(self.capSense.latest()))
+        val = self.capSense.latest()
+        try:
+            sensor = struct.pack('i', int(self.capSense.latest()))
+        except:
+            sensor = '\0\0\0\0'
         realPose = self.arm.getRealPose()
         if realPose is not None:
             self.sockOut.send(realPose.serialize() + sensor)

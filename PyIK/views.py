@@ -32,12 +32,13 @@ def getActuatorVerticalOffset(val):
 #     return val + 150 + 54.78
 
 class PlaneView:
-    def __init__(self, color=blue, width=6):
+    def __init__(self, color=blue, width=6, positioning='normal'):
         self.color = color
         self.line_width = width
         self.backSurface = None
         self.backSize = 500
         self.reachableXOffset = 90
+        self.positioning = positioning
 
     def renderReachableVolume(self, arm, res=50):
         offset = self.reachableXOffset
@@ -175,9 +176,10 @@ class PlaneView:
         r.drawText(text, black, [50, 60])
 
 class TopView:
-    def __init__(self, color=blue, width=6):
+    def __init__(self, color=blue, width=6, positioning='normal'):
         self.color = color
         self.line_width = width
+        self.positioning = positioning
 
     def draw(self, pose, r):
         # Z axis from top
@@ -228,3 +230,5 @@ class TopView:
 
         # show top-down effector position
         r.drawText(prettyVec(effector), col, pt_r(effector + [15,0]))
+
+        #r.drawArc(col, pt_r([0,0]), 60, 0, np.pi, 10)

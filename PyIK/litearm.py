@@ -11,6 +11,8 @@ MOTORSPEED = 0.9
 MOTORMARGIN = 1
 MOTORSLOPE = 40
 
+ERRORLIM = 5.0
+
 class ArmConfig:
     """Holds an arm's proportions, limits and other configuration data"""
     def __init__(self,
@@ -61,7 +63,7 @@ class ArmPose:
 
     @staticmethod
     def calcWristYAngle(servoAngle):
-        return radians(servoAngle - 150.0)
+        return radians(servoAngle - 147.0)
 
     def __init__(self,
                  arm_config,
@@ -112,7 +114,7 @@ class ArmPose:
         return 150 - degrees(self.wristXAngle)
 
     def getServoWristY(self):
-        return 150 + degrees(self.wristYAngle)
+        return 147 + degrees(self.wristYAngle)
 
     def armDiffAngle(self):
         return degrees(self.shoulder_angle - self.actuator_angle)
@@ -127,7 +129,11 @@ class ArmPose:
 
     def checkElevator(self):
         angle = self.getServoElevator()
-        return angle >= 60 and angle <= 230
+        return angle >= 60 and angle <= 210
+
+    def checkForearm(self):
+        angle = degrees(self.elbow_angle + self.shoulder_angle)
+        return angle < 200 and angle > 80
 
     def checkSwing(self):
         angle = self.getServoSwing()
@@ -148,8 +154,8 @@ class ArmPose:
         # No valid positions X<=0
         if self.wrist2D[0] <= 0:
             return False
-        # Effector must be < 180mm high
-        if self.effector[1] > 180:
+        # Effector height range
+        if self.effector[1] > 180 or self.effector[1] < -200:
             return False
         return True
 
@@ -157,7 +163,7 @@ class ArmPose:
         return (self.checkDiff() and self.checkActuator() and
                 self.checkElevator() and self.checkSwing() and
                 self.checkWristX() and self.checkWristY() and
-                self.checkPositioning())
+                self.checkPositioning() and self.checkForearm())
 
     def serialize(self):
         """Returns a packed struct holding the pose information"""
@@ -349,6 +355,7 @@ class ArmController:
                 target = self.target_pose.getServoElevator()
                 err = min(10, pos-target)
                 s.data['error'] += err*gain
+                s.data['error'] = np.clip(s.data['error'], -ERRORLIM, ERRORLIM)
                 s.setGoalPosition(target - s.data['error'])
             if self.servos['elbow'] is not None:
                 s = self.servos['elbow']
@@ -356,6 +363,7 @@ class ArmController:
                 target = self.target_pose.getServoActuator()
                 err = min(10, pos-target)
                 s.data['error'] += err*gain
+                s.data['error'] = np.clip(s.data['error'], -ERRORLIM, ERRORLIM)
                 s.setGoalPosition(target - s.data['error'])
 
             if self.servos['wrist_x'] is not None:

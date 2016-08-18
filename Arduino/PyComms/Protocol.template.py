@@ -125,7 +125,7 @@ class Servo:
         command = 's{{"\\x{0:02X}".format(ord(c.short))}}{pver}{packedid}{arg}'.format(
             pver = self.protocol,
             packedid = struct.pack('B', self.id),
-            {% if c.type == 'int' %}
+            {% if c.type == 'int' or c.type == 'bool' %}
             arg = struct.pack('i', val)
             {% else %}
             arg = struct.pack('f', val)
@@ -161,12 +161,16 @@ class Servo:
                 print ('Servo Error in get{{c.name}} <dx{0}:{1}> E{2}'.format(self.protocol, self.id, self.serial.readline()))
                 return None
             arg = tryRead(self.serial, 4)
-            {% if c.type == 'int' %}
+            {% if c.type == 'int' or c.type == 'bool' %}
             val = struct.unpack('i', arg)[0]
             {% else %}
             val = struct.unpack('f', arg)[0]
             {% endif %}
+            {% if c.type =='bool' %}
+            return bool(val)
+            {% else %}
             return val
+            {% endif %}
         except Exception as e:
             print ('Bad receive in get{{c.name}} <dx{0}:{1}> {2}'.format(self.protocol, self.id, e))
             return None

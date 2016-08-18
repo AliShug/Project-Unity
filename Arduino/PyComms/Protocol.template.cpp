@@ -58,6 +58,8 @@ void Protocol::dispatchV{{version}}Command(Stream &s, int mode, char command, ch
             case '{{"\\x{0:02X}".format(ord(c.short))}}': {
                 {% if c.type == 'float' %}
                 float val = _argf;
+                {% elif c.type == 'bool' %}
+                bool val = _argi;
                 {% else %}
                 long val = _argi;
                 {% endif %}
