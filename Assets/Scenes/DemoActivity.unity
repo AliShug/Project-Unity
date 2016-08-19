@@ -5003,6 +5003,10 @@ Prefab:
       propertyPath: releaseEvent.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 408472, guid: 3a9963a01bd5a1543be88d5a3d82e992, type: 2}
+      propertyPath: m_LocalScale.x
+      value: 0.20881186
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3a9963a01bd5a1543be88d5a3d82e992, type: 2}
   m_IsPrefabParent: 0
@@ -10190,10 +10194,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43c795ca84186f64c9d6c6fd3265f5f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mode: 2
+  mode: 1
   rootFolder: F:\Recordings\
-  recordingFile: Aleksander
-  playbackFile: Aleksander
+  recordingFile: Tom
+  playbackFile: Peter_2
   frameInterval: 1
   mainCamera: {fileID: 266907296}
 --- !u!4 &1579339431

@@ -12,7 +12,7 @@ public class ReactionMenu : PhysicsMenu
     };
 
     public int displayIterations = 10;
-    public Vector2 placementLimits = new Vector2(0.18f, 0.1f);
+    public Vector2 placementLimits = new Vector2(0.17f, 0.1f);
 
     public UnityEvent onFirstShow;
     public UnityEvent onNext;

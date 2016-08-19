@@ -154,7 +154,7 @@ public class SocketTest : MonoBehaviour
 
         // And pitch
         euler = wristPitchTransform.localRotation.eulerAngles;
-        euler.z = wristY;
+        euler.z = -wristY;
         wristPitchTransform.localRotation = Quaternion.Euler(euler);
 
 
