@@ -283,27 +283,33 @@ class Kinectics:
         # Find the current servo positions
         self.arm.pollServos()
 
+        # Make sure we're good
+        if pose is None or not pose.checkClearance():
+            # Revert to last good goal position
+            #self.curGoal = np.array(self.lastValidGoal)
+            # Find an acceptible position
+            #pdb.set_trace()
+            self.ikTarget = self.reachableVolume.projectValid(self.arm, self.ikTarget)
+            printVec(self.ikTarget)
+            self.arm.setWristGoalPosition(self.ikTarget)
+            pose = self.arm.getIKPose()
+
         # Calculate pose
         if self.lastPose is None:
             self.lastPose = pose
         display_pose = self.lastPose
 
-        if pose.checkClearance():
-            # Update display pose
-            display_pose = pose
-            self.lastPose = pose
-            # Drive the main arm
-            self.arm.setTargetPose(pose)
-            timer = time.clock()
-            self.arm.tick()
-            self.serial_time_accum += time.clock()-timer
-            self.serial_time_counter += 1
-            # Update the last known valid goal
-            self.lastValidGoal = np.array(self.ikTarget)
-        else:
-            # Revert to last good goal position
-            self.curGoal = np.array(self.lastValidGoal)
-            self.ikTarget = np.array(self.lastValidGoal)
+        # Update display pose
+        display_pose = pose
+        self.lastPose = pose
+        # Drive the main arm
+        self.arm.setTargetPose(pose)
+        timer = time.clock()
+        self.arm.tick()
+        self.serial_time_accum += time.clock()-timer
+        self.serial_time_counter += 1
+        # Update the last known valid goal
+        self.lastValidGoal = np.array(self.ikTarget)
 
         # Update the views
         realPose = self.arm.getRealPose()

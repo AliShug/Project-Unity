@@ -9,7 +9,7 @@ from util import *
 
 MOTORSPEED = 0.9
 MOTORMARGIN = 1
-MOTORSLOPE = 40
+MOTORSLOPE = 30
 
 ERRORLIM = 5.0
 

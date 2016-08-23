@@ -114,7 +114,7 @@ public class ReactionMenu : PhysicsMenu
             while (dist < 0.1f)
             {
                 newPos.x = Random.Range(-0.2f, 0.2f);
-                newPos.y = Random.Range(-0.2f, 0.2f);
+                newPos.y = Random.Range(-0.16f, 0.16f);
                 if (usedPositions.Count > 0)
                 {
                     float closest = Mathf.Infinity;

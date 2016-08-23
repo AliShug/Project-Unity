@@ -167,6 +167,16 @@ public class RecordingManager : MonoBehaviour
 
     private Queue<string> _messages = new Queue<string>(32);
 
+    // Playback control
+    private enum PlayMode
+    {
+        Pause,
+        Play,
+        Reverse
+    }
+    private PlayMode _playMode = PlayMode.Play;
+    private int _playSpeed = 1;
+
     // Set the static instance variable
     public RecordingManager()
     {
@@ -315,12 +325,20 @@ public class RecordingManager : MonoBehaviour
             {
                 if (_playbackFrame >= _recording.frames.Count)
                 {
-                    Debug.LogWarning("Recording over!");
-                    _stopped = true;
+                    //Debug.LogWarning("Recording over!");
                 }
                 else
                 {
-                    RecFrame frame = _recording.frames[_playbackFrame++];
+                    RecFrame frame = _recording.frames[_playbackFrame];
+                    if (_playMode == PlayMode.Play)
+                    {
+                        Step(_playSpeed);
+                    }
+                    else if (_playMode == PlayMode.Reverse)
+                    {
+                        Step(-_playSpeed);
+                    }
+
                     foreach (RecState state in frame.states)
                     {
                         // Get the object to update using the stored instance ID
@@ -392,6 +410,81 @@ public class RecordingManager : MonoBehaviour
         else if (instance.mode == Mode.Off)
         {
             Debug.LogFormat("<recording off> {0}", str);
+        }
+    }
+
+    private void Step(int dist)
+    {
+        _playbackFrame += dist;
+        if (_playbackFrame >= _recording.frames.Count)
+        {
+            _playbackFrame = _recording.frames.Count - 1;
+            _playMode = PlayMode.Pause;
+        }
+        else if (_playbackFrame < 0)
+        {
+            _playbackFrame = 0;
+            _playMode = PlayMode.Pause;
+        }
+    }
+
+    // Playback GUI
+    void OnGUI()
+    {
+        if (mode == Mode.Playback)
+        {
+            // |< , <<, >/||, >>, >|
+            int w = 50;
+            int h = 30;
+            int gap = 60;
+            int y = 25;
+            // Step back
+            if (GUI.Button(new Rect(w, y, w, h), "|<"))
+            {
+                _playMode = PlayMode.Pause;
+                Step(-1);
+            }
+
+            // Reverse
+            if (GUI.Button(new Rect(w+gap, y, w, h), "<<"))
+            {
+                _playMode = PlayMode.Reverse;
+            }
+
+            // Pause/play
+            if (_playMode == PlayMode.Pause)
+            {
+                if (GUI.Button(new Rect(w+gap*2, y, w, h), ">"))
+                {
+                    _playMode = PlayMode.Play;
+                }
+            }
+            else
+            {
+                if (GUI.Button(new Rect(w+gap*2, y, w, h), "||"))
+                {
+                    _playMode = PlayMode.Pause;
+                }
+            }
+
+            // Fast
+            if (GUI.RepeatButton(new Rect(w+gap*3, y, w, h), ">>"))
+            {
+                _playSpeed = 4;
+            }
+            else
+            {
+                _playSpeed = 1;
+            }
+
+            // Step forward
+            if (GUI.Button(new Rect(w+gap*4, y, w, h), ">|"))
+            {
+                _playMode = PlayMode.Pause;
+                Step(1);
+            }
+
+            GUI.Label(new Rect(w+gap*5, y, 100, h), string.Format("{0}s", _recording.frames[_playbackFrame].time));
         }
     }
 }
