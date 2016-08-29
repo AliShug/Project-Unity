@@ -22,6 +22,7 @@ public class PhysicsKeyboard : PhysicsInput
     }
 
     private List<KeyRow> keyRows = new List<KeyRow>();
+    private GameObject keyContainer;
 
     [Tooltip("YAML text asset specifying key mapping and layout")]
     public TextAsset layout;
@@ -60,7 +61,7 @@ public class PhysicsKeyboard : PhysicsInput
         }
 
         // Build the keyboard
-        GameObject keyContainer = new GameObject("KeyContainer");
+        keyContainer = new GameObject("KeyContainer");
         keyContainer.transform.SetParent(this.transform, false);
         keyContainer.transform.localEulerAngles = new Vector3(0.0f, 180.0f, 0.0f);
 
@@ -138,5 +139,14 @@ public class PhysicsKeyboard : PhysicsInput
                     return key.normal;
                 }
         }
+    }
+
+    private PhysicsKey getKeyAtPosition(Vector3 position)
+    {
+        // get in keyboard-space
+        var keyPos = keyContainer.transform.InverseTransformPoint(position);
+        var pos2D = new Vector2(keyPos.x, keyPos.y);
+
+        // TODO
     }
 }
