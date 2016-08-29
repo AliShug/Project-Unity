@@ -86,6 +86,7 @@ public class InteractiveObject : MonoBehaviour
     protected virtual void OnClickEnter() { return; }
     protected virtual void OnHoverEnter() { return; }
     protected virtual void OnHoverExit() { return; }
+    protected virtual void OnHovering(Vector3 hoverPoint) { return; }
 
     protected virtual void OnPhysicsReset() { return; }
 
@@ -102,6 +103,11 @@ public class InteractiveObject : MonoBehaviour
     {
         _hovering = false;
         OnHoverExit();
+    }
+
+    public void Hovering(Vector3 hoverPoint)
+    {
+        OnHovering(hoverPoint);
     }
 
     public Vector3 GetNearestPoint(Vector3 poi)

@@ -207,16 +207,23 @@ public class PhysicsInputManager : MonoBehaviour
         if (targetInput)
         {
             // Hover selection logic <THERE CAN BE ONLY ONE>
+            // either there's no active, previous target...
             if (!_lastHovered || !_lastHovered.gameObject.activeInHierarchy)
             {
                 targetInput.HoverEnter();
                 _lastHovered = targetInput;
             }
+            // ... or there was, but we switch away from it
             else if (_lastHovered != targetInput)
             {
                 _lastHovered.HoverExit();
                 targetInput.HoverEnter();
                 _lastHovered = targetInput;
+            }
+            // Otherwise, we're hovering over an input, so update it
+            else if (_lastHovered == targetInput)
+            {
+                _lastHovered.Hovering(closestBone.position);
             }
 
             // Get the actual interaction point

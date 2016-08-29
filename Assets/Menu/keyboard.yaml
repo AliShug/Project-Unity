@@ -1,0 +1,175 @@
+rows:
+    -   keys:
+            -   std:    "esc"
+                shift:  "esc"
+                width:  1.0
+    -   keys:
+            -   std:    "`"
+                shift:  "¬"
+                width:  1.0
+            -   std:    "1"
+                shift:  "!"
+                width:  1.0
+            -   std:    "2"
+                shift:  '"'
+                width:  1.0
+            -   std:    "3"
+                shift:  "£"
+                width:  1.0
+            -   std:    "4"
+                shift:  "$"
+                width:  1.0
+            -   std:    "5"
+                shift:  "%"
+                width:  1.0
+            -   std:    "6"
+                shift:  "^"
+                width:  1.0
+            -   std:    "7"
+                shift:  "&"
+                width:  1.0
+            -   std:    "8"
+                shift:  "*"
+                width:  1.0
+            -   std:    "9"
+                shift:  "("
+                width:  1.0
+            -   std:    "0"
+                shift:  ")"
+                width:  1.0
+            -   std:    "-"
+                shift:  "_"
+                width:  1.0
+            -   std:    "="
+                shift:  "+"
+                width:  1.0
+            -   std:    "bsp"
+                shift:  "bsp"
+                width:  2.5
+    -   keys:
+            -   std:    "tab"
+                shift:  "tab"
+                width:  1.5
+            -   std:    "q"
+                shift:  "Q"
+                width:  1.0
+            -   std:    "w"
+                shift:  "W"
+                width:  1.0
+            -   std:    "e"
+                shift:  "E"
+                width:  1.0
+            -   std:    "r"
+                shift:  "R"
+                width:  1.0
+            -   std:    "t"
+                shift:  "T"
+                width:  1.0
+            -   std:    "y"
+                shift:  "Y"
+                width:  1.0
+            -   std:    "u"
+                shift:  "U"
+                width:  1.0
+            -   std:    "i"
+                shift:  "I"
+                width:  1.0
+            -   std:    "o"
+                shift:  "O"
+                width:  1.0
+            -   std:    "p"
+                shift:  "P"
+                width:  1.0
+            -   std:    "["
+                shift:  "{"
+                width:  1.0
+            -   std:    "]"
+                shift:  "}"
+                width:  1.0
+            -   std:    "ret"
+                shift:  "ret"
+                width:  2.0
+    -   keys:
+            -   std:    "caps"
+                shift:  "caps"
+                width:  2.0
+            -   std:    "a"
+                shift:  "A"
+                width:  1.0
+            -   std:    "s"
+                shift:  "S"
+                width:  1.0
+            -   std:    "d"
+                shift:  "D"
+                width:  1.0
+            -   std:    "f"
+                shift:  "F"
+                width:  1.0
+            -   std:    "g"
+                shift:  "G"
+                width:  1.0
+            -   std:    "h"
+                shift:  "H"
+                width:  1.0
+            -   std:    "j"
+                shift:  "J"
+                width:  1.0
+            -   std:    "k"
+                shift:  "K"
+                width:  1.0
+            -   std:    "l"
+                shift:  "L"
+                width:  1.0
+            -   std:    ";"
+                shift:  ":"
+                width:  1.0
+            -   std:    "'"
+                shift:  "@"
+                width:  1.0
+            -   std:    "#"
+                shift:  "~"
+                width:  1.0
+    -   keys:
+            -   std:    "shift"
+                shift:  "shift"
+                width:  1.5
+            -   std:    "\\"
+                shift:  "|"
+                width:  1.0
+            -   std:    "z"
+                shift:  "Z"
+                width:  1.0
+            -   std:    "x"
+                shift:  "X"
+                width:  1.0
+            -   std:    "c"
+                shift:  "C"
+                width:  1.0
+            -   std:    "v"
+                shift:  "V"
+                width:  1.0
+            -   std:    "b"
+                shift:  "B"
+                width:  1.0
+            -   std:    "n"
+                shift:  "N"
+                width:  1.0
+            -   std:    "m"
+                shift:  "M"
+                width:  1.0
+            -   std:    ","
+                shift:  "<"
+                width:  1.0
+            -   std:    "."
+                shift:  ">"
+                width:  1.0
+            -   std:    "/"
+                shift:  "?"
+                width:  1.0
+            -   std:    "shift"
+                shift:  "shift"
+                width:  3.0
+    -   keys:
+            -   std:    " "
+                shift:  " "
+                width:  16.7
