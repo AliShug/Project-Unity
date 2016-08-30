@@ -1,0 +1,62 @@
+rows:
+    -   keys:
+            -   std:    "7"
+                shift:  "7"
+                width:  1.0
+            -   std:    "8"
+                shift:  "8"
+                width:  1.0
+            -   std:    "9"
+                shift:  "9"
+                width:  1.0
+            -   std:    "del"
+                shift:  "del"
+                width:  1.0
+            -   std:    "clr"
+                shift:  "clr"
+                width:  1.0
+    -   keys:
+            -   std:    "4"
+                shift:  "4"
+                width:  1.0
+            -   std:    "5"
+                shift:  "5"
+                width:  1.0
+            -   std:    "6"
+                shift:  "6"
+                width:  1.0
+            -   std:    "times"
+                shift:  "times"
+                width:  1.0
+            -   std:    "div"
+                shift:  "div"
+                width:  1.0
+    -   keys:
+            -   std:    "1"
+                shift:  "1"
+                width:  1.0
+            -   std:    "2"
+                shift:  "2"
+                width:  1.0
+            -   std:    "3"
+                shift:  "3"
+                width:  1.0
+            -   std:    "plus"
+                shift:  "plus"
+                width:  1.0
+            -   std:    "minus"
+                shift:  "minus"
+                width:  1.0
+    -   keys:
+            -   std:    "0"
+                shift:  "0"
+                width:  2.1
+            -   std:    "."
+                shift:  "."
+                width:  1.0
+            -   std:    "ans"
+                shift:  "ans"
+                width:  1.0
+            -   std:    "="
+                shift:  "="
+                width:  1.0

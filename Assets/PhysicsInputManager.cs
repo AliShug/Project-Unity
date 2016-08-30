@@ -7,6 +7,12 @@ using MeshExtensions; // custom extension methods
 public class PhysicsInputManager : MonoBehaviour
 {
 
+    public bool enableThumb = true;
+    public bool enableIndex = true;
+    public bool enableMiddle = true;
+    public bool enableRing = true;
+    public bool enablePinky = true;
+
     public enum Handedness
     {
         Both,
@@ -121,6 +127,9 @@ public class PhysicsInputManager : MonoBehaviour
             defaultMenu.Show();
             _currentMenu = defaultMenu;
         }
+
+        // Initialize hand choice to set value
+        HandChoice = _handChoice;
     }
 
     void UpdateSensor()
@@ -144,6 +153,8 @@ public class PhysicsInputManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+
         // Grab the current child input components
         InteractiveObject[] childInputs = transform.GetComponentsInChildren<InteractiveObject>();
 
@@ -175,6 +186,16 @@ public class PhysicsInputManager : MonoBehaviour
                 {
                     foreach (RigidFinger finger in hand.fingers)
                     {
+                        // Skip disabled fingers
+                        if (!enableIndex && finger.name == "index" ||
+                            !enableMiddle && finger.name == "middle" ||
+                            !enableRing && finger.name == "ring" ||
+                            !enablePinky && finger.name == "pinky" ||
+                            !enableThumb && finger.name == "thumb")
+                        {
+                            continue;
+                        }
+
                         if (input.Touchable)
                         {
                             Transform bone = finger.bones[3];

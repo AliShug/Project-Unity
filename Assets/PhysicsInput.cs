@@ -167,16 +167,17 @@ public class PhysicsInput : InteractiveObject
     {
         // Capacitive sensor-based clicking logic
         var comms = SocketTest.Instance;
+        var input = GetComponentInParent<PhysicsInputManager>();
         // Limited to the currently hovered input
         if (Hovered)
         {
-            if (comms.CapacitiveSensor > clickThreshold && !_clicked)
+            if (input.Sensor && !_clicked)
             {
                 _clicked = true;
                 OnClickEnter();
                 pressEvent.Invoke();
             }
-            else if (comms.CapacitiveSensor < clickThreshold && _clicked)
+            else if (!input.Sensor && _clicked)
             {
                 _clicked = false;
                 OnClickExit();

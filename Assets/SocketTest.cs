@@ -100,6 +100,10 @@ public class SocketTest : MonoBehaviour
             send_raw[2] = 0;
             send_raw[3] = 0;
             // goal pos
+            if (pos.z < 0.0f)
+            {
+                pos.z = 0.0f;
+            }
             BitConverter.GetBytes(pos.x).CopyTo(send_raw, 4);
             BitConverter.GetBytes(pos.y - 0.0296f).CopyTo(send_raw, 4 + 1*sizeof(float));
             BitConverter.GetBytes(pos.z).CopyTo(send_raw, 4 + 2*sizeof(float));

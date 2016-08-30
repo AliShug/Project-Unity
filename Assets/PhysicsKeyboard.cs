@@ -7,15 +7,17 @@ using YamlDotNet.RepresentationModel;
 
 public class PhysicsKeyboard : PhysicsInput
 {
-    [System.Serializable]
     public class PhysicsKey
     {
         public string normal;
         public string shifted;
         public float width;
+        public float x, y;
+        public Vector2 dim;
+
+        public GameObject obj;
     }
 
-    [System.Serializable]
     public class KeyRow
     {
         public List<PhysicsKey> keys = new List<PhysicsKey>();
@@ -23,10 +25,13 @@ public class PhysicsKeyboard : PhysicsInput
 
     private List<KeyRow> keyRows = new List<KeyRow>();
     private GameObject keyContainer;
+    private PhysicsKey hoveredKey = null, pressedKey = null;
 
     [Tooltip("YAML text asset specifying key mapping and layout")]
     public TextAsset layout;
+    [Tooltip("Prefab for Keys, must contain resizeable 64x64 canvas with one Text child")]
     public GameObject keyPrefab;
+    public GameObject panel = null;
 
     public float keySize = 1.0f;
     public float keyGap = 0.1f;
@@ -94,6 +99,12 @@ public class PhysicsKeyboard : PhysicsInput
                 newKey.GetComponentInChildren<RectTransform>().sizeDelta = dim;
                 newKey.GetComponentInChildren<Text>().text = labelKey(false, key);
 
+                // Save key properties
+                key.x = x;
+                key.y = y;
+                key.dim = new Vector2(size*key.width, size);
+                key.obj = newKey;
+
                 x += size*key.width + gap;
             }
             if (x > xLim)
@@ -103,13 +114,80 @@ public class PhysicsKeyboard : PhysicsInput
         }
 
         // Place key container to center keyboard
-        keyContainer.transform.localPosition = new Vector3(xLim/2, -yLim/2);
+        keyContainer.transform.localPosition = new Vector3(xLim/2 + gap, -yLim/2 - gap);
+
+        // Resize background panel
+        if (panel)
+        {
+            var scale = panel.transform.localScale;
+            panel.transform.localScale = new Vector3(xLim + 2*gap, -y + 2*gap, scale.z);
+        }
     }
 
     protected override void OnHovering(Vector3 hoverPoint)
     {
         base.OnHovering(hoverPoint);
+
+        if (hoveredKey != null && hoveredKey != pressedKey)
+        {
+            var pos = hoveredKey.obj.transform.localPosition;
+            hoveredKey.obj.transform.localPosition = new Vector3(pos.x, pos.y, 0.0f);
+        }
+
         // Find closest key to hover point
+        hoveredKey = getKeyAtPosition(hoverPoint);
+        if (hoveredKey != null && hoveredKey != pressedKey)
+        {
+            var pos = hoveredKey.obj.transform.localPosition;
+            hoveredKey.obj.transform.localPosition = new Vector3(pos.x, pos.y, -0.003f);
+        }
+    }
+
+    protected override void OnHoverExit()
+    {
+        base.OnHoverExit();
+        if (hoveredKey != null)
+        {
+            var pos = hoveredKey.obj.transform.localPosition;
+            hoveredKey.obj.transform.localPosition = new Vector3(pos.x, pos.y, 0.0f);
+        }
+        hoveredKey = null;
+    }
+
+    protected override void OnClickEnter()
+    {
+        base.OnClickEnter();
+        if (hoveredKey != null)
+        {
+            if (pressedKey != null)
+            {
+                UnpressKey();
+            }
+            PressKey(hoveredKey);
+        }
+    }
+
+    protected override void OnClickExit()
+    {
+        base.OnClickExit();
+        if (pressedKey != null)
+        {
+            UnpressKey();
+        }
+    }
+
+    private void PressKey(PhysicsKey key)
+    {
+        pressedKey = key;
+        var pos = key.obj.transform.localPosition;
+        key.obj.transform.localPosition = new Vector3(pos.x, pos.y, 0.003f);
+    }
+
+    private void UnpressKey()
+    {
+        var pos = pressedKey.obj.transform.localPosition;
+        pressedKey.obj.transform.localPosition = new Vector3(pos.x, pos.y, 0.0f);
+        pressedKey = null;
     }
 
     private string labelKey(bool shifted, PhysicsKey key)
@@ -128,6 +206,20 @@ public class PhysicsKeyboard : PhysicsInput
                 return "Caps lock";
             case "bsp":
                 return "<- Backspace";
+            case "del":
+                return "Del";
+            case "clr":
+                return "AC";
+            case "times":
+                return "X";
+            case "div":
+                return "÷";
+            case "plus":
+                return "+";
+            case "minus":
+                return "-";
+            case "ans":
+                return "Ans";
 
             default:
                 if (shifted)
@@ -147,6 +239,23 @@ public class PhysicsKeyboard : PhysicsInput
         var keyPos = keyContainer.transform.InverseTransformPoint(position);
         var pos2D = new Vector2(keyPos.x, keyPos.y);
 
-        // TODO
+        // Iterate over keys, finding the intersecting one
+        float gap = keyGap / 200;
+        foreach (var row in this.keyRows)
+        {
+            foreach (var key in row.keys)
+            {
+                if (pos2D.x > key.x - gap &&
+                    pos2D.x < key.x + key.dim.x + gap &&
+                    pos2D.y < key.y + key.dim.y/2 + gap &&
+                    pos2D.y > key.y - key.dim.y/2 - gap)
+                {
+                    return key;
+                }
+            }
+        }
+
+        // Didn't hit any keys
+        return null;
     }
 }
