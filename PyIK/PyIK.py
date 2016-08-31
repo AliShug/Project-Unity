@@ -181,12 +181,14 @@ class Kinectics:
                 raw = self.sockIn.recv(4096)
                 data = struct.unpack('?ffffff', raw)
                 # enable or disable the physical arm
+                # goal change is only applied with an enabled packet
                 self.arm.enableMovement(data[0])
-                goalPos = np.array(data[1:4])
-                self.goalNormal = np.array(data[4:])
-                #print(data)
-                newGoal = goalPos*1000
-                self.curGoal = np.array(newGoal)
+                if data[0]:
+                    goalPos = np.array(data[1:4])
+                    self.goalNormal = np.array(data[4:])
+                    #print(data)
+                    newGoal = goalPos*1000
+                    self.curGoal = np.array(newGoal)
             except socket.error as err:
                 print ("Socket error: {0}".format(err))
         #sensor = struct.pack('i', 0)
@@ -201,6 +203,16 @@ class Kinectics:
             self.sockOut.send(realPose.serialize() + sensor)
         else:
             self.sockOut.send(self.arm.getIKPose().serialize() + sensor)
+
+    def resetIKTarget(self, target):
+        # Reset lerp timer
+        self.lerpTimer = time.clock()
+        # Reset lerp speed to 0
+        self.lerpSpeed = 0.0
+        # Clear error buildup
+        self.arm.clearPositionError()
+        # Set the IK target
+        self.ikTarget = np.array(target)
 
     def lerpIKTarget(self):
         # Scales with time delta
@@ -261,15 +273,24 @@ class Kinectics:
                         self.curGoal[2] = topgoal[1]
                     if self.curGoal[2] < 1:
                         self.curGoal[2] = 1
-            elif event.type == pyg.KEYDOWN:
+            elif event.type == pyg.KEYUP:
                 if event.key == pyg.K_SPACE:
-                    self.arm.enableMovement(True)
+                    if self.arm.motion_enable:
+                        self.arm.enableMovement(False)
+                    else:
+                        self.arm.enableMovement(True)
 
         # Clear the render canvas
         self.r.surf.fill(white)
 
-        # Lerp towards target
-        self.lerpIKTarget()
+        # If arm is active, we lerp towards target.
+        # Otherwise we set the IK target to match the current pose
+        if self.arm.motion_enable:
+            self.lerpIKTarget()
+        else:
+            real_pose = self.arm.getRealPose()
+            if real_pose is not None:
+                self.resetIKTarget(real_pose.effector)
 
         # IK - calculate swing and elbow pos using goal pos
         timer = time.clock()
@@ -290,7 +311,7 @@ class Kinectics:
             # Find an acceptible position
             #pdb.set_trace()
             self.ikTarget = self.reachableVolume.projectValid(self.arm, self.ikTarget)
-            printVec(self.ikTarget)
+            #printVec(self.ikTarget)
             self.arm.setWristGoalPosition(self.ikTarget)
             pose = self.arm.getIKPose()
 

@@ -36,6 +36,8 @@ public class PhysicsKeyboard : PhysicsInput
     public float keySize = 1.0f;
     public float keyGap = 0.1f;
 
+    public KeyboardListener[] listeners;
+
     protected override void OnStart()
     {
         base.OnStart();
@@ -181,10 +183,20 @@ public class PhysicsKeyboard : PhysicsInput
         pressedKey = key;
         var pos = key.obj.transform.localPosition;
         key.obj.transform.localPosition = new Vector3(pos.x, pos.y, 0.003f);
+
+        foreach (KeyboardListener listener in listeners)
+        {
+            listener.OnKeyDown(pressedKey);
+        }
     }
 
     private void UnpressKey()
     {
+        foreach (KeyboardListener listener in listeners)
+        {
+            listener.OnKeyUp(pressedKey);
+        }
+
         var pos = pressedKey.obj.transform.localPosition;
         pressedKey.obj.transform.localPosition = new Vector3(pos.x, pos.y, 0.0f);
         pressedKey = null;

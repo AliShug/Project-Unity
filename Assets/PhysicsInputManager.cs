@@ -280,6 +280,8 @@ public class PhysicsInputManager : MonoBehaviour
                 Vector3 offset = new Vector3(0.0f, 0.0f, 0.18f);
                 // offset from index finger's end
                 displayTargetWidget.position = activeHand.fingers[1].bones[3].transform.position + offset;
+                // Reset normal direction
+                displayTargetWidget.rotation = safeZone.transform.rotation;
             }
 
             if (displayBoneWidget)

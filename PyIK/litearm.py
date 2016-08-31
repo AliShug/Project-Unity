@@ -224,7 +224,8 @@ class ArmController:
                     servo.setCWSlope(MOTORSLOPE)
                     servo.setCCWSlope(MOTORSLOPE)
         # Store parameters
-        self.motion_enable = False
+        self.motion_enable = True
+        self.enableMovement(False)
         self.cfg = arm_config
         # Dirty flags for stored poses
         self.ik_pose = None
@@ -235,11 +236,26 @@ class ArmController:
         self.target_pose = None
 
     def enableMovement(self, enable):
+        changed = False
         if enable and not self.motion_enable:
             print ("Warning: Arm enabled")
             self.motion_enable = True
+            changed = True
         elif not enable:
             self.motion_enable = False
+            changed = True
+        if changed:
+            # Set servos on/off
+            if self.servos['swing'] is not None:
+                self.servos['swing'].setTorqueEnable(self.motion_enable)
+            if self.servos['shoulder'] is not None:
+                self.servos['shoulder'].setTorqueEnable(self.motion_enable)
+            if self.servos['elbow'] is not None:
+                self.servos['elbow'].setTorqueEnable(self.motion_enable)
+            if self.servos['wrist_x'] is not None:
+                self.servos['wrist_x'].setTorqueEnable(self.motion_enable)
+            if self.servos['wrist_y'] is not None:
+                self.servos['wrist_y'].setTorqueEnable(self.motion_enable)
 
     def setWristGoalPosition(self, pos):
         self.ik.setGoal(pos)
@@ -338,35 +354,36 @@ class ArmController:
         self.target_pose = new_pose
 
     def tick(self):
-        if self.target_pose is not None and self.motion_enable:
-            # Drive servos
-            gain = 0.1
-            if self.servos['swing'] is not None:
-                s = self.servos['swing']
-                pos = s.data['pos']
-                target = self.target_pose.getServoSwing()
-                # err = min(10, pos-target)
-                # s.data['error'] += err*gain
-                s.setGoalPosition(target)
-            if self.servos['shoulder'] is not None:
-                s = self.servos['shoulder']
-                # cumulative error
-                pos = s.data['pos']
-                target = self.target_pose.getServoElevator()
-                err = min(10, pos-target)
-                s.data['error'] += err*gain
-                s.data['error'] = np.clip(s.data['error'], -ERRORLIM, ERRORLIM)
-                s.setGoalPosition(target - s.data['error'])
-            if self.servos['elbow'] is not None:
-                s = self.servos['elbow']
-                pos = s.data['pos']
-                target = self.target_pose.getServoActuator()
-                err = min(10, pos-target)
-                s.data['error'] += err*gain
-                s.data['error'] = np.clip(s.data['error'], -ERRORLIM, ERRORLIM)
-                s.setGoalPosition(target - s.data['error'])
+        if self.target_pose is not None:
+            if self.motion_enable:
+                # Drive servos
+                gain = 0.1
+                if self.servos['swing'] is not None:
+                    s = self.servos['swing']
+                    pos = s.data['pos']
+                    target = self.target_pose.getServoSwing()
+                    # err = min(10, pos-target)
+                    # s.data['error'] += err*gain
+                    s.setGoalPosition(target)
+                if self.servos['shoulder'] is not None:
+                    s = self.servos['shoulder']
+                    # cumulative error
+                    pos = s.data['pos']
+                    target = self.target_pose.getServoElevator()
+                    err = min(10, pos-target)
+                    s.data['error'] += err*gain
+                    s.data['error'] = np.clip(s.data['error'], -ERRORLIM, ERRORLIM)
+                    s.setGoalPosition(target - s.data['error'])
+                if self.servos['elbow'] is not None:
+                    s = self.servos['elbow']
+                    pos = s.data['pos']
+                    target = self.target_pose.getServoActuator()
+                    err = min(10, pos-target)
+                    s.data['error'] += err*gain
+                    s.data['error'] = np.clip(s.data['error'], -ERRORLIM, ERRORLIM)
+                    s.setGoalPosition(target - s.data['error'])
 
-            if self.servos['wrist_x'] is not None:
-                self.servos['wrist_x'].setGoalPosition(self.target_pose.getServoWristX())
-            if self.servos['wrist_y'] is not None:
-                self.servos['wrist_y'].setGoalPosition(self.target_pose.getServoWristY())
+                if self.servos['wrist_x'] is not None:
+                    self.servos['wrist_x'].setGoalPosition(self.target_pose.getServoWristX())
+                if self.servos['wrist_y'] is not None:
+                    self.servos['wrist_y'].setGoalPosition(self.target_pose.getServoWristY())

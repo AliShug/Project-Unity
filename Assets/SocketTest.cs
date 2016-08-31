@@ -168,4 +168,25 @@ public class SocketTest : MonoBehaviour
 
         _frame++;
     }
+
+    void OnDisable()
+    {
+        if (sockOut != null)
+        {
+            Debug.Log("Disabling arm");
+            // A simple packet of all 0s disables the arm
+            byte[] send_raw = new byte[4 + sizeof(float)*6];
+            for (int i = 0; i > send_raw.Length; i++)
+            {
+                send_raw[i] = 0;
+            }
+            sockOut.Send(send_raw);
+
+            sockOut.Close();
+        }
+        if (sockIn != null)
+        {
+            sockIn.Close();
+        }
+    }
 }
