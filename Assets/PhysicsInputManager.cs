@@ -35,6 +35,8 @@ public class PhysicsInputManager : MonoBehaviour
     }
 
     public bool holdTarget = false;
+    [Tooltip("Hold the arm's position while the touchpad is active")]
+    public bool holdOnTouch = true;
 
     public Transform safeZone;
     public Transform displayTargetWidget;
@@ -249,7 +251,7 @@ public class PhysicsInputManager : MonoBehaviour
 
             // Get the actual interaction point
             interactionPoint = targetInput.GetInteractionPoint(closestPoint, effectorDim);
-            if (displayTargetWidget && !holdTarget)
+            if (displayTargetWidget && !ShouldHold())
             {
                 displayTargetWidget.gameObject.SetActive(true);
                 displayTargetWidget.position = interactionPoint;
@@ -274,7 +276,7 @@ public class PhysicsInputManager : MonoBehaviour
                 _lastHovered = null;
             }
             // move to offset from index finger
-            if (displayTargetWidget && !holdTarget)
+            if (displayTargetWidget && !ShouldHold())
             {
                 displayTargetWidget.gameObject.SetActive(true);
                 Vector3 offset = new Vector3(0.0f, 0.0f, 0.18f);
@@ -321,7 +323,7 @@ public class PhysicsInputManager : MonoBehaviour
     void RetractArm()
     {
         // Track to safe zone
-        if (displayTargetWidget && !holdTarget)
+        if (displayTargetWidget && !ShouldHold())
         {
             displayTargetWidget.gameObject.SetActive(true);
             displayTargetWidget.transform.position = safeZone.transform.position;
@@ -348,5 +350,10 @@ public class PhysicsInputManager : MonoBehaviour
         {
             _touchActive = true;
         }
+    }
+
+    private bool ShouldHold()
+    {
+        return holdTarget || (holdOnTouch && Sensor);
     }
 }

@@ -99,10 +99,18 @@ public class SocketTest : MonoBehaviour
             send_raw[1] = 0;
             send_raw[2] = 0;
             send_raw[3] = 0;
-            // goal pos
-            if (pos.z < 0.0f)
+            // goal pos (limit for safety/spazzing out)
+            if (pos.z < 0.1f)
             {
-                pos.z = 0.0f;
+                pos.z = 0.1f;
+            }
+            if (pos.z > 0.4f)
+            {
+                pos.z = 0.4f;
+            }
+            if (pos.y < -0.2f)
+            {
+                pos.y = -0.2f;
             }
             BitConverter.GetBytes(pos.x).CopyTo(send_raw, 4);
             BitConverter.GetBytes(pos.y - 0.0296f).CopyTo(send_raw, 4 + 1*sizeof(float));

@@ -90,4 +90,20 @@ public class PhysicsButton : PhysicsInput
         currentColor = baseColor;
         ColorUpdate();
     }
+
+    // Color changing stuff
+    public void SetColor(Color col)
+    {
+        materialUnique.color = col;
+    }
+
+    public void SetGreen()
+    {
+        SetColor(Color.green);
+    }
+
+    public void SetRed()
+    {
+        SetColor(Color.red);
+    }
 }
