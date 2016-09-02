@@ -4,6 +4,8 @@ using System.Collections;
 [RequireComponent(typeof(Renderer))]
 public class ColorChanger : MonoBehaviour {
 
+    public Color enableColor, disableColor;
+
     private Material _uniqueMaterial;
 
 	void Awake() {
@@ -25,5 +27,17 @@ public class ColorChanger : MonoBehaviour {
     public void SetRed()
     {
         SetColor(Color.red);
+    }
+
+    public void SetEnableCol(bool enable)
+    {
+        if (enable)
+        {
+            SetColor(enableColor);
+        }
+        else
+        {
+            SetColor(disableColor);
+        }
     }
 }

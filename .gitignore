@@ -52,3 +52,5 @@ $RECYCLE.BIN/
 *.buildinfo
 Arduino/Comms/Debug/Comms.ino.elf
 Arduino/Comms/__vm/
+
+Capture/

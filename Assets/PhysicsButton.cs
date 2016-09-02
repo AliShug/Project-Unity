@@ -4,6 +4,7 @@ using System.Collections;
 
 public class PhysicsButton : PhysicsInput
 {
+    public Color enableColor, disableColor;
 
     public Color baseColor;
     public Color hoverColor;
@@ -105,5 +106,17 @@ public class PhysicsButton : PhysicsInput
     public void SetRed()
     {
         SetColor(Color.red);
+    }
+
+    public void SetEnableCol(bool enable)
+    {
+        if (enable)
+        {
+            SetColor(enableColor);
+        }
+        else
+        {
+            SetColor(disableColor);
+        }
     }
 }
