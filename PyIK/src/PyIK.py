@@ -127,7 +127,10 @@ class Kinectics:
             arm_config = litearm.ArmConfig())
 
         # Capacitive sensor on connected UNO
-        self.capSense = capsense.CapacitiveSensor('COM4')
+        try:
+            self.capSense = capsense.CapacitiveSensor(CS_PORT)
+        except serial.SerialException as ex:
+            self.capSense = None;
 
         self.sideView = views.PlaneView(width=10)
         self.realSideView = views.PlaneView(width=5, color=gray, positioning='offset')
@@ -192,11 +195,14 @@ class Kinectics:
             except socket.error as err:
                 print ("Socket error: {0}".format(err))
         #sensor = struct.pack('i', 0)
-        self.capSense.updateReadings()
-        val = self.capSense.latest()
-        try:
-            sensor = struct.pack('i', int(self.capSense.latest()))
-        except:
+        if self.capSense:
+            self.capSense.updateReadings()
+            val = self.capSense.latest()
+            try:
+                sensor = struct.pack('i', int(self.capSense.latest()))
+            except:
+                sensor = '\0\0\0\0'
+        else:
             sensor = '\0\0\0\0'
         realPose = self.arm.getRealPose()
         if realPose is not None:

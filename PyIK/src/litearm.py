@@ -21,8 +21,8 @@ class ArmConfig:
                  linkage_length = 155,
                  lower_actuator_length = 65,
                  upper_actuator_length = 54.4,
-                 wrist_length = 90.6,
-                 shoulder_offset = [-10, 18.568]):
+                 wrist_length = 90.52,
+                 shoulder_offset = [-9.7, 18.71]):
         self.main_length = main_length
         self.forearm_length = forearm_length
         self.linkage_length = linkage_length

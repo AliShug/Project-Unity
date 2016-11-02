@@ -83,7 +83,7 @@ def waitFor(serial, num_bytes, timeout=0.1):
         if serial.in_waiting >= num_bytes:
             return
 
-    raise TimeoutException('Timeout')
+    #raise TimeoutException('Timeout')
 
 def tryRead(serial, num_bytes, timeout=0.05):
     start = time.time()
@@ -94,7 +94,7 @@ def tryRead(serial, num_bytes, timeout=0.05):
         if serial.in_waiting >= num_bytes:
             return serial.read(num_bytes)
 
-    raise TimeoutException('Timeout')
+    #raise TimeoutException('Timeout')
 
 
 class CapacitiveSensor:

@@ -2225,7 +2225,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 187914, guid: 3a9963a01bd5a1543be88d5a3d82e992, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 187914, guid: 3a9963a01bd5a1543be88d5a3d82e992, type: 2}
       propertyPath: m_Name
@@ -2765,7 +2765,7 @@ MonoBehaviour:
   hoverDistance: 0.1
   effectorDim: {x: 0.08, y: 0.08}
   comms: {fileID: 544861567}
-  sensorThreshold: 1100
+  sensorThreshold: 300
 --- !u!114 &281974145
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2921,7 +2921,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 187914, guid: 3a9963a01bd5a1543be88d5a3d82e992, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 187914, guid: 3a9963a01bd5a1543be88d5a3d82e992, type: 2}
       propertyPath: m_Name
@@ -6379,15 +6379,15 @@ Prefab:
     m_Modifications:
     - target: {fileID: 470624, guid: 4de65fd6ffba479469af01e732f31552, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 470624, guid: 4de65fd6ffba479469af01e732f31552, type: 2}
       propertyPath: m_LocalPosition.y
-      value: -0.426
+      value: -0.444
       objectReference: {fileID: 0}
     - target: {fileID: 470624, guid: 4de65fd6ffba479469af01e732f31552, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 0.21
+      value: 0.227
       objectReference: {fileID: 0}
     - target: {fileID: 470624, guid: 4de65fd6ffba479469af01e732f31552, type: 2}
       propertyPath: m_LocalRotation.x
@@ -11294,7 +11294,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1579339429}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 41ec1fee1cbdbd64ba083cf35440dcb0, type: 3}
   m_Name: 

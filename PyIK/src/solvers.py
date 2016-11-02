@@ -168,6 +168,8 @@ class IKSolver:
                     theta_high = self.swing
                     # print ("New high ", theta_high)
             iters += 1
+        # if (iters > 2):
+        #     print(iters)
 
         # Radial distance (shoulder to goal)
         self.radial = np.linalg.norm(self.goaltd - self.shoulder(self.swing))
