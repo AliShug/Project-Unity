@@ -158,6 +158,7 @@ class Kinectics:
         self.sideView.renderReachableVolume(self.reachableVolume)
 
     def stop(self):
+        self.arm.enableMovement(False)
         self.perflog.write('ik_avg {0}\n'.format(self.ik_time_accum/self.ik_time_counter))
         self.perflog.write('serial_avg {0}\n'.format(self.serial_time_accum/self.serial_time_counter))
         self.perflog.write('render_avg {0}\n'.format(self.render_time_accum/self.render_time_counter))
