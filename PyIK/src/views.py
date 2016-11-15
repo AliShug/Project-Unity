@@ -3,20 +3,23 @@ import numpy as np
 
 from util import *
 
+ORIGIN_L = [50, 300]
+ORIGIN_R = [850, 760]
+
 def pt_l(p):
     point = np.array(p).astype(int)
-    return (150 + point[0], 300 - point[1])
+    return (ORIGIN_L[0] + point[0], ORIGIN_L[1] - point[1])
 
 def pt_r(p):
     point = np.array(p).astype(int)
-    return (900 + point[0], 450 - point[1])
+    return (ORIGIN_R[0] + point[0], ORIGIN_R[1] - point[1])
 
 
 def unpt_l(p):
-    return np.array([p[0] - 150, 300 - p[1]])
+    return np.array([p[0] - ORIGIN_L[0], ORIGIN_L[1] - p[1]])
 
 def unpt_r(p):
-    return np.array([p[0] - 900, 450 - p[1]])
+    return np.array([p[0] - ORIGIN_R[0], ORIGIN_R[1] - p[1]])
 
 
 def getArmVerticalOffset(val):

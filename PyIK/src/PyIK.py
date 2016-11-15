@@ -30,6 +30,9 @@ DECEL = 1.0
 
 CS_PORT = 'COM4'
 
+WINDOW_W = 1280
+WINDOW_H = 800
+
 import pdb;
 
 class Kinectics:
@@ -113,7 +116,7 @@ class Kinectics:
 
 
         window.InitRenderer()
-        self.r = window.Renderer(pyg.display.set_mode([1200, 600], pyg.DOUBLEBUF|pyg.HWSURFACE))
+        self.r = window.Renderer(pyg.display.set_mode([WINDOW_W, WINDOW_H], pyg.DOUBLEBUF|pyg.HWSURFACE))
         pyg.display.set_caption("IK Control Test")
 
         # The arm's controller - encapsulates IK and arm control
@@ -261,7 +264,7 @@ class Kinectics:
             elif (event.type == pyg.MOUSEBUTTONDOWN
                     or event.type == pyg.MOUSEMOTION):
                 if pyg.mouse.get_pressed()[0]:
-                    if event.pos[0] < 600:
+                    if event.pos[0] < (420 + views.ORIGIN_L[0]) and event.pos[1] < event.pos[0]*2:
                         # lock direction on start of interaction
                         if event.type == pyg.MOUSEBUTTONDOWN:
                             goal_topdown = [self.curGoal[0], self.curGoal[2]]
